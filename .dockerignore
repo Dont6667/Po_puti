@@ -1,0 +1,10 @@
+.git
+.tools
+.agents
+.codex
+data
+tests
+node_modules
+*.zip
+.env
+public/assets/uploads

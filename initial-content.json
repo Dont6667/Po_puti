@@ -1,0 +1,143 @@
+{
+  "routes": [
+    {
+      "id": "shira",
+      "capacity": 7,
+      "from": "Красноярск",
+      "to": "Шира",
+      "via": "Балахта · Новосёлово",
+      "duration": "≈ 4 часа",
+      "times": "08:00, 11:00, 15:00, 17:00",
+      "price": 1000,
+      "priceFrom": true,
+      "type": "Регулярный рейс",
+      "image": "/assets/places/shira.jpg",
+      "imageAlt": "Озеро Шира",
+      "active": true
+    },
+    {
+      "id": "krasnoyarsk",
+      "capacity": 7,
+      "from": "Шира",
+      "to": "Красноярск",
+      "via": "Новосёлово · Балахта",
+      "duration": "≈ 4 часа",
+      "times": "08:00, 11:00, 15:00, 17:00",
+      "price": 1000,
+      "priceFrom": true,
+      "type": "Обратный маршрут",
+      "image": "/assets/places/krasnoyarsk.jpg",
+      "imageAlt": "Красноярск с высоты Столбов",
+      "active": true
+    },
+    {
+      "id": "minusinsk",
+      "capacity": 7,
+      "from": "Красноярск",
+      "to": "Минусинск",
+      "via": "Через Абакан",
+      "duration": "≈ 6–7 часов",
+      "times": "08:00, 11:00, 15:00, 17:00",
+      "price": 2500,
+      "priceFrom": false,
+      "type": "Регулярный рейс",
+      "image": "/assets/places/minusinsk.jpg",
+      "imageAlt": "Исторический центр Минусинска",
+      "active": true
+    },
+    {
+      "id": "priiskovoye",
+      "capacity": 7,
+      "from": "Красноярск",
+      "to": "Приисковое",
+      "via": "Индивидуальная поездка",
+      "duration": "≈ 6–7 часов",
+      "times": "08:00, 11:00, 15:00, 17:00",
+      "price": 23000,
+      "priceFrom": true,
+      "type": "Трансфер",
+      "image": "/assets/places/priiskovoye.jpg",
+      "imageAlt": "Приисковое, Хакасия",
+      "active": true
+    }
+  ],
+  "contacts": {
+    "phone": "+7 950 302 6566",
+    "transferPhone": "+7 950 302 6566",
+    "hours": "Ежедневно, 08:00–22:00",
+    "telegram": "https://t.me/+79503026566",
+    "telegramGroup": "https://t.me/+X5nh1d1gbxQ3YjMy",
+    "whatsapp": "https://wa.me/79082004949",
+    "max": "https://max.ru/join/me_ERm2_Bd0mnKcRhEsneyQ0I64S7TG37wgXaX04rNs"
+  },
+  "images": {
+    "hero": "/assets/fleet.jpg",
+    "contact": "/assets/fleet.jpg",
+    "articleShira": "/assets/mirror/0eeaf37cdcc6cfecc40c.webp",
+    "articleLake": "/assets/khakassia.jpg",
+    "articleTuim": "/assets/mirror/e7c7753f5cef0b3ae8c5.webp",
+    "logo": "/assets/po-puti-logo.png",
+    "journey": "/assets/mirror/5eb81ffd6865af9238a8.jpg",
+    "salon": "",
+    "comfortCar": "/assets/comfort-minivan-cutout.png",
+    "comfortDriver": "/assets/driver-andrey-car.png",
+    "comfortRoutes": "/assets/comfort-road.png",
+    "transferHero": "/assets/transfer-banner-sage.png"
+  },
+  "fleet": [
+    {
+      "name": "Toyota Vellfire",
+      "count": 3,
+      "image": "/assets/vellfire-russian.jpg"
+    },
+    {
+      "name": "Toyota Alphard",
+      "count": 5,
+      "image": "/assets/alphard-russian.jpg"
+    },
+    {
+      "name": "Honda Stepwgn",
+      "count": 3,
+      "image": "/assets/stepwgn-russian-124.jpg"
+    }
+  ],
+  "drivers": [
+    {
+      "name": "Геннадий",
+      "experience": 20,
+      "image": "/assets/driver-gennady.png",
+      "position": 50,
+      "description": "",
+      "active": true
+    },
+    {
+      "name": "Александр",
+      "experience": 20,
+      "image": "/assets/driver-alexander.png",
+      "position": 50,
+      "description": "",
+      "active": true
+    },
+    {
+      "name": "Андрей",
+      "experience": 20,
+      "image": "/assets/driver-portrait-personal-v3.png",
+      "position": 50,
+      "description": "",
+      "active": true
+    },
+    {
+      "name": "Юрий",
+      "experience": 20,
+      "image": "/assets/driver-yuri.png",
+      "position": 50,
+      "description": "",
+      "active": true
+    }
+  ],
+  "driverSection": {
+    "active": true,
+    "title": "Наши водители",
+    "description": "Опыт, внимание и забота в каждой поездке."
+  }
+}

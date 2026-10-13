@@ -1,0 +1,27 @@
+services:
+  website:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${BIND_ADDRESS:-0.0.0.0}:${PORT:-3001}:3001"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3001
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
+    volumes:
+      - site-data:/app/data
+      - site-uploads:/app/public/assets/uploads
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  site-data:
+  site-uploads:
+

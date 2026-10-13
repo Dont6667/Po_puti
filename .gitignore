@@ -1,0 +1,7 @@
+.tools/
+node_modules/
+data/
+public/assets/uploads/
+.env
+*.zip
+backups/

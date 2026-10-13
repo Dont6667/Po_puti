@@ -1,0 +1,25 @@
+services:
+  website:
+    build: .
+    restart: unless-stopped
+    environment: {HOST: 0.0.0.0, PORT: 3001, COOKIE_SECURE: 1}
+    volumes: ["site-data:/app/data", "site-uploads:/app/public/assets/uploads"]
+    init: true
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    logging:
+      options: {max-size: "10m", max-file: "3"}
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes: ["./deploy/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy-data:/data", "caddy-config:/config"]
+    depends_on:
+      website: {condition: service_healthy}
+volumes:
+  site-data:
+  site-uploads:
+  caddy-data:
+  caddy-config:
