@@ -2,3 +2,7 @@
     encode zstd gzip
     reverse_proxy website:3001
 }
+
+www.poputi-vmeste.ru {
+    redir https://poputi-vmeste.ru{uri} permanent
+}

@@ -4,14 +4,16 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check server.mjs && node --check admin-api.mjs && node --check content-store.mjs && node --check booking-store.mjs && node --check public/copy-custom.js && node --check public/content.js && node --check public/admin.js && node --check public/booking.js && node --check public/controls.js && node --check public/intro.js",
-    "test": "node tests/booking-check.mjs"
+    "check": "node --check server.mjs && node --check admin-api.mjs && node --check content-store.mjs && node --check booking-store.mjs && node --check public/copy-custom.js && node --check public/content.js && node --check public/admin.js && node --check public/booking.js && node --check public/controls.js && node --check public/intro.js && node --check seo.mjs && node --check public/analytics.js && node --check public/images.js",
+    "test": "node tests/booking-check.mjs",
+    "test:seo": "node tests/seo-check.mjs"
   },
   "engines": {
     "node": ">=24"
   },
   "dependencies": {
-    "@imgly/background-removal-node": "^1.4.5"
+    "@imgly/background-removal-node": "^1.4.5",
+    "linkedom": "^0.18.12"
   },
   "overrides": {
     "sharp": "0.35.5",

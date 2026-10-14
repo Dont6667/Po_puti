@@ -2,7 +2,12 @@ services:
   website:
     build: .
     restart: unless-stopped
-    environment: {HOST: 0.0.0.0, PORT: 3001, COOKIE_SECURE: 1}
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3001
+      COOKIE_SECURE: 1
+      METRICA_ID: ${METRICA_ID:-}
+      GA4_ID: ${GA4_ID:-}
     volumes: ["site-data:/app/data", "site-uploads:/app/public/assets/uploads"]
     init: true
     security_opt: ["no-new-privileges:true"]

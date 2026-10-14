@@ -9,5 +9,6 @@ if [[ ! -f .env ]]; then
 fi
 command -v docker >/dev/null || { echo 'Install Docker first: see DEPLOY.md'; exit 1; }
 docker compose -f compose.production.yaml up -d --build --wait --wait-timeout 300
+docker compose -f compose.production.yaml exec -T proxy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 echo 'Admin access (use your domain instead of the internal host):'
 docker compose -f compose.production.yaml exec -T website cat /app/data/admin-access.txt
