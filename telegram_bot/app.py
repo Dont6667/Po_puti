@@ -195,7 +195,7 @@ def keyboard(b, admin_url):
     rows = [[InlineKeyboardButton(text='Номер', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=normalized_phone(b['phone']))), InlineKeyboardButton(text='Имя', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=b['name']))],
             [InlineKeyboardButton(text='Позвонить', icon_custom_emoji_id=CUSTOM_EMOJI['📞'], url=b['call_url'], style='primary'), InlineKeyboardButton(text='↗ Кабинет', url=admin_url)]]
     if b['status'] == 'pending':
-        rows.append([InlineKeyboardButton(text='✓ Подтвердить', callback_data='b:confirm:' + b['id'], style='success'), InlineKeyboardButton(text='✕ Отклонить', callback_data='b:reject:' + b['id'], style='danger')])
+        rows.append([InlineKeyboardButton(text='Подтвердить', icon_custom_emoji_id=CUSTOM_EMOJI['🟢'], callback_data='b:confirm:' + b['id'], style='success'), InlineKeyboardButton(text='Отклонить', icon_custom_emoji_id=CUSTOM_EMOJI['🔴'], callback_data='b:reject:' + b['id'], style='danger')])
     elif b['status'] == 'confirmed':
         rows.append([InlineKeyboardButton(text='Отменить заявку', callback_data='b:cancel:' + b['id'], style='danger')])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -257,7 +257,7 @@ class Service:
                 continue
             try:
                 if not row:
-                    message = await self.bot.send_message(admin, message_text(b), reply_markup=keyboard(b, self.admin_url))
+                    message = await self.bot.send_message(admin, message_text(b), reply_markup=keyboard(b, self.admin_url), disable_notification=False)
                     self.store.sent(b['id'], admin, message.message_id, fp, self.clock())
                     log('booking_delivered', booking_id=b['id'], chat_id=admin)
                 elif row['fingerprint'] != fp:

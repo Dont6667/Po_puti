@@ -41,6 +41,8 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         await self.service.deliver(self.booking)
         await self.service.deliver(self.booking)
         self.assertEqual(self.bot.send_message.await_count, 2)
+        for call in self.bot.send_message.await_args_list:
+            self.assertIs(call.kwargs['disable_notification'], False)
         original_expiry = self.store.find(self.booking['id'], self.cfg.admins[0])['expires_at']
         # Persisted state survives service reconstruction/restart.
         service2 = Service(self.cfg, self.bot, self.site, self.store, lambda: self.now)
@@ -92,6 +94,8 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(buttons[0][1].icon_custom_emoji_id, CUSTOM_EMOJI['📋'])
         self.assertEqual(buttons[1][0].icon_custom_emoji_id, CUSTOM_EMOJI['📞'])
         self.assertEqual(buttons[1][0].text, 'Позвонить')
+        self.assertEqual(buttons[2][0].icon_custom_emoji_id, CUSTOM_EMOJI['🟢'])
+        self.assertEqual(buttons[2][1].icon_custom_emoji_id, CUSTOM_EMOJI['🔴'])
         for status, symbol in [('confirmed', '🟢'), ('cancelled', '⚪'), ('rejected', '🔴')]:
             self.assertIn(emoji(symbol), message_text({**self.booking, 'status': status}))
 
