@@ -23,7 +23,21 @@ from aiogram.types import CopyTextButton, InlineKeyboardButton, InlineKeyboardMa
 
 DAY = 86400
 KRASNOYARSK = timezone(timedelta(hours=7))
-STATUS = {'pending': '🟠 Ожидает решения', 'confirmed': '🟢 Подтверждена', 'cancelled': '⚪ Отменена', 'rejected': '🔴 Отклонена'}
+CUSTOM_EMOJI = {
+    '📞': '6041650621776401666', '🟠': '5846127793313681804',
+    '🟢': '5845901478601953249', '⚪': '5846127793313681804',
+    '🔴': '5846210329700217522', '📅': '5274055917766202507',
+    '💳': '5848392697072586723', '👤': '5303328645329209869',
+    '💬': '5443038326535759644', '📋': '5395613344897979554',
+    '⚠️': '5447644880824181073',
+}
+
+
+def emoji(symbol):
+    return f'<tg-emoji emoji-id="{CUSTOM_EMOJI[symbol]}">{symbol}</tg-emoji>'
+
+
+STATUS = {'pending': emoji('🟠') + ' Ожидает решения', 'confirmed': emoji('🟢') + ' Подтверждена', 'cancelled': emoji('⚪') + ' Отменена', 'rejected': emoji('🔴') + ' Отклонена'}
 
 
 def log(event, **fields):
@@ -159,18 +173,18 @@ def message_text(b):
     return (f"<b>ПО ПУТИ · ЗАЯВКА #{e(b['id'][:8].upper())}</b>\n"
             f"{STATUS.get(b['status'], 'Статус уточняется')}\n\n"
             f"<b>{e(b['from'])} → {e(b['to'])}</b>\n"
-            f"📅 {date} · <b>{e(b['time'])}</b> <i>Красноярск, UTC+7</i>\n"
+            f"{emoji('📅')} {date} · <b>{e(b['time'])}</b> <i>Красноярск, UTC+7</i>\n"
             f"💺 Места: <b>{e(seats)}</b> · Пассажиров: {len(b['seats'])}\n"
-            f"💳 {'от ' if b.get('priceFrom') else ''}<b>{fare} ₽</b> за выбранные места\n\n"
-            f"👤 <b>{e(b['name'])}</b>\n"
-            f"📞 <code>{e(normalized_phone(b['phone']))}</code>\n"
-            + (f"\n💬 {e(b['comment'])}\n" if b.get('comment') else '')
+            f"{emoji('💳')} {'от ' if b.get('priceFrom') else ''}<b>{fare} ₽</b> за выбранные места\n\n"
+            f"{emoji('👤')} <b>{e(b['name'])}</b>\n"
+            f"{emoji('📞')} <code>{e(normalized_phone(b['phone']))}</code>\n"
+            + (f"\n{emoji('💬')} {e(b['comment'])}\n" if b.get('comment') else '')
             + "\n<i>Сообщение удалится через 24 часа после отправки. История останется на сайте.</i>")
 
 
 def keyboard(b, admin_url):
-    rows = [[InlineKeyboardButton(text='📋 Номер', copy_text=CopyTextButton(text=normalized_phone(b['phone']))), InlineKeyboardButton(text='📋 Имя', copy_text=CopyTextButton(text=b['name']))],
-            [InlineKeyboardButton(text='📞 Позвонить', url=b['call_url'], style='primary'), InlineKeyboardButton(text='↗ Кабинет', url=admin_url)]]
+    rows = [[InlineKeyboardButton(text='Номер', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=normalized_phone(b['phone']))), InlineKeyboardButton(text='Имя', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=b['name']))],
+            [InlineKeyboardButton(text='Позвонить', icon_custom_emoji_id=CUSTOM_EMOJI['📞'], url=b['call_url'], style='primary'), InlineKeyboardButton(text='↗ Кабинет', url=admin_url)]]
     if b['status'] == 'pending':
         rows.append([InlineKeyboardButton(text='✓ Подтвердить', callback_data='b:confirm:' + b['id'], style='success'), InlineKeyboardButton(text='✕ Отклонить', callback_data='b:reject:' + b['id'], style='danger')])
     elif b['status'] == 'confirmed':
@@ -301,7 +315,7 @@ class Service:
                 # Seat-conflict errors are shown in the existing card, not a
                 # stream of passenger messages or untracked temporary replies.
                 current = await self.site.request('bookings/' + booking_id)
-                await self.bot.edit_message_text(message_text(current) + '\n\n⚠️ ' + html.escape(str(error)), chat_id=callback.from_user.id, message_id=row['message_id'], reply_markup=keyboard(current, self.admin_url))
+                await self.bot.edit_message_text(message_text(current) + '\n\n' + emoji('⚠️') + ' ' + html.escape(str(error)), chat_id=callback.from_user.id, message_id=row['message_id'], reply_markup=keyboard(current, self.admin_url))
 
     async def background(self):
         while True:

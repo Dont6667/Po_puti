@@ -18,7 +18,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TelegramAPIServer
 from aiohttp import web
-from app import AdminOnly, DAY, Service, Settings, Store, fingerprint, keyboard, message_text
+from app import CUSTOM_EMOJI, emoji, AdminOnly, DAY, Service, Settings, Store, fingerprint, keyboard, message_text
 
 
 class BotTests(unittest.IsolatedAsyncioTestCase):
@@ -80,6 +80,20 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(markup['inline_keyboard'][0][0]['copy_text']['text'], '+79991234567')
         self.assertEqual(markup['inline_keyboard'][2][0]['style'], 'success')
         self.assertEqual(markup['inline_keyboard'][2][1]['style'], 'danger')
+
+    async def test_custom_emoji_text_and_buttons(self):
+        text = message_text(self.booking)
+        for symbol in ['🟠', '📅', '💳', '👤', '📞', '💬']:
+            self.assertIn(emoji(symbol), text)
+        self.assertIn('💺 Места:', text)
+        self.assertNotIn('💺', CUSTOM_EMOJI)
+        buttons = keyboard(self.booking, 'https://example.test/admin').inline_keyboard
+        self.assertEqual(buttons[0][0].icon_custom_emoji_id, CUSTOM_EMOJI['📋'])
+        self.assertEqual(buttons[0][1].icon_custom_emoji_id, CUSTOM_EMOJI['📋'])
+        self.assertEqual(buttons[1][0].icon_custom_emoji_id, CUSTOM_EMOJI['📞'])
+        self.assertEqual(buttons[1][0].text, 'Позвонить')
+        for status, symbol in [('confirmed', '🟢'), ('cancelled', '⚪'), ('rejected', '🔴')]:
+            self.assertIn(emoji(symbol), message_text({**self.booking, 'status': status}))
 
     async def test_access_only_private_allowlist(self):
         gate = AdminOnly(self.cfg.admins)
