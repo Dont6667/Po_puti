@@ -1,11 +1,20 @@
+FROM node:24-bookworm-slim AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY public ./public
+COPY scripts ./scripts
+COPY initial-content.json ./
+RUN npm run build && npm prune --omit=dev && npm cache clean --force
+
 FROM node:24-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3001
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=build /app/package.json /app/package-lock.json ./
+COPY --from=build /app/node_modules ./node_modules
 COPY --chown=node:node *.mjs ./
 COPY --chown=node:node initial-content.json ./
-COPY --chown=node:node public ./public
+COPY --from=build --chown=node:node /app/public ./public
 RUN mkdir -p /app/data /app/public/assets/uploads && chown -R node:node /app/data /app/public/assets/uploads
 USER node
 EXPOSE 3001

@@ -1,0 +1,22 @@
+{
+  "homeCss": "/assets/built/home-c4b43a6098d8.css",
+  "readingCss": "/assets/built/reading-1787178a5fbb.css",
+  "homeJs": "/assets/built/home-5db93a1a00a8.js",
+  "analyticsJs": "/assets/built/analytics-aa191c221d83.js",
+  "fonts": [
+    "/assets/built/golos-e50f20864e00.woff2",
+    "/assets/built/unbounded-4aea944c49e7.woff2"
+  ],
+  "removedStyles": [
+    "/assets/mirror/55fa348d4437c18e9566.css",
+    "/assets/mirror/8c6add94e7c35860a639.css",
+    "/assets/mirror/8e325ae34bc30a890225.css",
+    "/assets/mirror/8004c4ed69143b0d8dc8.css",
+    "/assets/mirror/905c230a772b36f697d2.css",
+    "/assets/mirror/0b1e4e40a1d70e231a28.css",
+    "/assets/mirror/df08572c095674ee8324.css",
+    "/assets/mirror/76bfd73cb648a2850a5a.css",
+    "/assets/mirror/a1f4a83f3637f540e9b2.css",
+    "/assets/mirror/606033fbd7b18ccf4c0e.css"
+  ]
+}

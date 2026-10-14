@@ -8,6 +8,8 @@ if [[ ! -f .env ]]; then
   printf 'DOMAIN=%s\n' "$1" > .env
 fi
 command -v docker >/dev/null || { echo 'Install Docker first: see DEPLOY.md'; exit 1; }
+# Validate the proposed proxy config before changing running containers.
+docker compose -f compose.production.yaml run --rm --no-deps proxy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 docker compose -f compose.production.yaml up -d --build --wait --wait-timeout 300
 docker compose -f compose.production.yaml exec -T proxy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 echo 'Admin access (use your domain instead of the internal host):'

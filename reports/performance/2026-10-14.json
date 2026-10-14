@@ -1,0 +1,695 @@
+{
+  "before-mobile": {
+    "url": "http://127.0.0.1:3001/",
+    "device": "mobile",
+    "scores": {
+      "performance": 57.99999999999999,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 7366.939555999556,
+        "display": "7.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 10229.644222999224,
+        "display": "10.2 s"
+      },
+      "speed-index": {
+        "value": 7366.939555999556,
+        "display": "7.4 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.05039291918440289,
+        "display": "0.05"
+      },
+      "server-response-time": {
+        "value": 1,
+        "display": "Root document took 0 ms"
+      },
+      "total-byte-weight": {
+        "value": 4033390,
+        "display": "Total size was 3,939 KiB"
+      }
+    },
+    "lcp": {
+      "type": "list",
+      "items": [
+        {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 5.081999984741211
+            },
+            {
+              "subpart": "resourceLoadDelay",
+              "label": "Resource load delay",
+              "duration": 34.984000015258786
+            },
+            {
+              "subpart": "resourceLoadDuration",
+              "label": "Resource load duration",
+              "duration": 41.428
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 178.67
+            }
+          ]
+        },
+        {
+          "type": "node",
+          "lhId": "page-0-DIV",
+          "path": "1,HTML,1,BODY,1,DIV,5,MAIN,0,DIV",
+          "selector": "body.t-body > div#allrecords > main#main-content > div#rec3331677601",
+          "boundingRect": {
+            "top": 247,
+            "bottom": 796,
+            "left": 0,
+            "right": 412,
+            "width": 412,
+            "height": 549
+          },
+          "snippet": "<div id=\"rec3331677601\" class=\"r t-rec pp-hero\" style=\"--zoom: 1;\" data-animationappear=\"off\" data-record-type=\"396\">",
+          "nodeLabel": "КРАСНОЯРСК · ХАКАСИЯ\nПассажирские поездки.\nКрасноярск · Хакасия.\n\nПо Сибири — с…"
+        }
+      ]
+    },
+    "errors": []
+  },
+  "before-desktop": {
+    "url": "http://127.0.0.1:3001/",
+    "device": "desktop",
+    "scores": {
+      "performance": 89,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 703.3695251227249,
+        "display": "0.7 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2208.0434301472696,
+        "display": "2.2 s"
+      },
+      "speed-index": {
+        "value": 703.3695251227249,
+        "display": "0.7 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0.012675818088777435,
+        "display": "0.013"
+      },
+      "server-response-time": {
+        "value": 1,
+        "display": "Root document took 0 ms"
+      },
+      "total-byte-weight": {
+        "value": 4818315,
+        "display": "Total size was 4,705 KiB"
+      }
+    },
+    "lcp": {
+      "type": "list",
+      "items": [
+        {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 4.518
+            },
+            {
+              "subpart": "resourceLoadDelay",
+              "label": "Resource load delay",
+              "duration": 14.124
+            },
+            {
+              "subpart": "resourceLoadDuration",
+              "label": "Resource load duration",
+              "duration": 28.696
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 217.542
+            }
+          ]
+        },
+        {
+          "type": "node",
+          "lhId": "page-0-DIV",
+          "path": "1,HTML,1,BODY,1,DIV,5,MAIN,0,DIV",
+          "selector": "body.t-body > div#allrecords > main#main-content > div#rec3331677601",
+          "boundingRect": {
+            "top": 141,
+            "bottom": 702,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 561
+          },
+          "snippet": "<div id=\"rec3331677601\" class=\"r t-rec pp-hero\" style=\"--zoom: 1;\" data-animationappear=\"off\" data-record-type=\"396\">",
+          "nodeLabel": "КРАСНОЯРСК · ХАКАСИЯ\nПассажирские поездки.\nКрасноярск · Хакасия.\n\nПо Сибири — с…"
+        }
+      ]
+    },
+    "errors": []
+  },
+  "live-before-mobile": {
+    "url": "https://poputi-vmeste.ru/",
+    "device": "mobile",
+    "scores": {
+      "performance": 95,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 1426.6902,
+        "display": "1.4 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2420.6902,
+        "display": "2.4 s"
+      },
+      "speed-index": {
+        "value": 4203.934119752046,
+        "display": "4.2 s"
+      },
+      "total-blocking-time": {
+        "value": 9,
+        "display": "10 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "server-response-time": {
+        "value": 180,
+        "display": "Root document took 180 ms"
+      },
+      "total-byte-weight": {
+        "value": 3283840,
+        "display": "Total size was 3,207 KiB"
+      }
+    },
+    "lcp": {
+      "type": "list",
+      "items": [
+        {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 183.64
+            },
+            {
+              "subpart": "resourceLoadDelay",
+              "label": "Resource load delay",
+              "duration": 19.077
+            },
+            {
+              "subpart": "resourceLoadDuration",
+              "label": "Resource load duration",
+              "duration": 249.785
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 133.64
+            }
+          ]
+        },
+        {
+          "type": "node",
+          "lhId": "page-0-DIV",
+          "path": "1,HTML,1,BODY,1,DIV,5,MAIN,0,DIV",
+          "selector": "body.t-body > div#allrecords > main#main-content > div#rec3331677601",
+          "boundingRect": {
+            "top": 247,
+            "bottom": 796,
+            "left": 0,
+            "right": 412,
+            "width": 412,
+            "height": 549
+          },
+          "snippet": "<div id=\"rec3331677601\" class=\"r t-rec pp-hero\" style=\"--zoom: 1;\" data-animationappear=\"off\" data-record-type=\"396\">",
+          "nodeLabel": "КРАСНОЯРСК · ХАКАСИЯ\nПассажирские поездки.\nКрасноярск · Хакасия.\n\nПо Сибири — с…"
+        }
+      ]
+    },
+    "errors": []
+  },
+  "publish-1-mobile": {
+    "url": "http://127.0.0.1:3004/",
+    "device": "mobile",
+    "scores": {
+      "performance": 98,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 976.2012,
+        "display": "1.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2405.2012,
+        "display": "2.4 s"
+      },
+      "speed-index": {
+        "value": 976.2012,
+        "display": "1.0 s"
+      },
+      "total-blocking-time": {
+        "value": 21,
+        "display": "20 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "server-response-time": {
+        "value": 1,
+        "display": "Root document took 0 ms"
+      },
+      "total-byte-weight": {
+        "value": 480652,
+        "display": "Total size was 469 KiB"
+      }
+    },
+    "lcp": {
+      "type": "list",
+      "items": [
+        {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 4.8519999847412105
+            },
+            {
+              "subpart": "resourceLoadDelay",
+              "label": "Resource load delay",
+              "duration": 50.23500001525879
+            },
+            {
+              "subpart": "resourceLoadDuration",
+              "label": "Resource load duration",
+              "duration": 10.179
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 123.611
+            }
+          ]
+        },
+        {
+          "type": "node",
+          "lhId": "page-0-DIV",
+          "path": "1,HTML,1,BODY,1,DIV,5,MAIN,0,DIV",
+          "selector": "body.t-body > div#allrecords > main#main-content > div#rec3331677601",
+          "boundingRect": {
+            "top": 247,
+            "bottom": 760,
+            "left": 0,
+            "right": 412,
+            "width": 412,
+            "height": 513
+          },
+          "snippet": "<div id=\"rec3331677601\" class=\"r t-rec pp-hero\" style=\"--zoom: 1;\" data-animationappear=\"off\" data-record-type=\"396\">",
+          "nodeLabel": "КРАСНОЯРСК · ХАКАСИЯ\nПассажирские поездки.\nКрасноярск · Хакасия.\n\nПо Сибири — с…"
+        }
+      ]
+    },
+    "errors": []
+  },
+  "publish-2-mobile": {
+    "url": "http://127.0.0.1:3004/",
+    "device": "mobile",
+    "scores": {
+      "performance": 98,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 981.0123000000001,
+        "display": "1.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2406.0123,
+        "display": "2.4 s"
+      },
+      "speed-index": {
+        "value": 981.0123000000001,
+        "display": "1.0 s"
+      },
+      "total-blocking-time": {
+        "value": 25,
+        "display": "30 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "server-response-time": {
+        "value": 1,
+        "display": "Root document took 0 ms"
+      },
+      "total-byte-weight": {
+        "value": 480652,
+        "display": "Total size was 469 KiB"
+      }
+    },
+    "lcp": {
+      "type": "list",
+      "items": [
+        {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 4.8900000152587895
+            },
+            {
+              "subpart": "resourceLoadDelay",
+              "label": "Resource load delay",
+              "duration": 13.517999984741211
+            },
+            {
+              "subpart": "resourceLoadDuration",
+              "label": "Resource load duration",
+              "duration": 8.07
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 114.779
+            }
+          ]
+        },
+        {
+          "type": "node",
+          "lhId": "page-0-DIV",
+          "path": "1,HTML,1,BODY,1,DIV,5,MAIN,0,DIV",
+          "selector": "body.t-body > div#allrecords > main#main-content > div#rec3331677601",
+          "boundingRect": {
+            "top": 247,
+            "bottom": 760,
+            "left": 0,
+            "right": 412,
+            "width": 412,
+            "height": 513
+          },
+          "snippet": "<div id=\"rec3331677601\" class=\"r t-rec pp-hero\" style=\"--zoom: 1;\" data-animationappear=\"off\" data-record-type=\"396\">",
+          "nodeLabel": "КРАСНОЯРСК · ХАКАСИЯ\nПассажирские поездки.\nКрасноярск · Хакасия.\n\nПо Сибири — с…"
+        }
+      ]
+    },
+    "errors": []
+  },
+  "publish-3-mobile": {
+    "url": "http://127.0.0.1:3004/",
+    "device": "mobile",
+    "scores": {
+      "performance": 98,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 963.3642,
+        "display": "1.0 s"
+      },
+      "largest-contentful-paint": {
+        "value": 2405.3642,
+        "display": "2.4 s"
+      },
+      "speed-index": {
+        "value": 963.3642,
+        "display": "1.0 s"
+      },
+      "total-blocking-time": {
+        "value": 8,
+        "display": "10 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "server-response-time": {
+        "value": 1,
+        "display": "Root document took 0 ms"
+      },
+      "total-byte-weight": {
+        "value": 480652,
+        "display": "Total size was 469 KiB"
+      }
+    },
+    "lcp": {
+      "type": "list",
+      "items": [
+        {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 5.486999984741211
+            },
+            {
+              "subpart": "resourceLoadDelay",
+              "label": "Resource load delay",
+              "duration": 15.137000015258788
+            },
+            {
+              "subpart": "resourceLoadDuration",
+              "label": "Resource load duration",
+              "duration": 6.717
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 94.336
+            }
+          ]
+        },
+        {
+          "type": "node",
+          "lhId": "page-0-DIV",
+          "path": "1,HTML,1,BODY,1,DIV,5,MAIN,0,DIV",
+          "selector": "body.t-body > div#allrecords > main#main-content > div#rec3331677601",
+          "boundingRect": {
+            "top": 247,
+            "bottom": 760,
+            "left": 0,
+            "right": 412,
+            "width": 412,
+            "height": 513
+          },
+          "snippet": "<div id=\"rec3331677601\" class=\"r t-rec pp-hero\" style=\"--zoom: 1;\" data-animationappear=\"off\" data-record-type=\"396\">",
+          "nodeLabel": "КРАСНОЯРСК · ХАКАСИЯ\nПассажирские поездки.\nКрасноярск · Хакасия.\n\nПо Сибири — с…"
+        }
+      ]
+    },
+    "errors": []
+  },
+  "publish-1-desktop": {
+    "url": "http://127.0.0.1:3004/",
+    "device": "desktop",
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "value": 224.1729,
+        "display": "0.2 s"
+      },
+      "largest-contentful-paint": {
+        "value": 706.3458,
+        "display": "0.7 s"
+      },
+      "speed-index": {
+        "value": 291.67259210895435,
+        "display": "0.3 s"
+      },
+      "total-blocking-time": {
+        "value": 0,
+        "display": "0 ms"
+      },
+      "cumulative-layout-shift": {
+        "value": 0,
+        "display": "0"
+      },
+      "server-response-time": {
+        "value": 1,
+        "display": "Root document took 0 ms"
+      },
+      "total-byte-weight": {
+        "value": 1683471,
+        "display": "Total size was 1,644 KiB"
+      }
+    },
+    "lcp": {
+      "type": "list",
+      "items": [
+        {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 4.97
+            },
+            {
+              "subpart": "resourceLoadDelay",
+              "label": "Resource load delay",
+              "duration": 42.263
+            },
+            {
+              "subpart": "resourceLoadDuration",
+              "label": "Resource load duration",
+              "duration": 12.216
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 116.304
+            }
+          ]
+        },
+        {
+          "type": "node",
+          "lhId": "page-0-DIV",
+          "path": "1,HTML,1,BODY,1,DIV,5,MAIN,0,DIV",
+          "selector": "body.t-body > div#allrecords > main#main-content > div#rec3331677601",
+          "boundingRect": {
+            "top": 141,
+            "bottom": 702,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 561
+          },
+          "snippet": "<div id=\"rec3331677601\" class=\"r t-rec pp-hero\" style=\"--zoom: 1;\" data-animationappear=\"off\" data-record-type=\"396\">",
+          "nodeLabel": "КРАСНОЯРСК · ХАКАСИЯ\nПассажирские поездки.\nКрасноярск · Хакасия.\n\nПо Сибири — с…"
+        }
+      ]
+    },
+    "errors": []
+  }
+}

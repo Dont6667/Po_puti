@@ -1,0 +1,13 @@
+/* The first screen is visible immediately, including without JavaScript.
+   Keep arrival motion for lower-page cards; do not delay heading or actions. */
+.pp-hero-inner h1,.pp-hero-inner>.pp-eyebrow,.pp-hero-inner>p,.pp-hero-actions a{opacity:1;animation:none!important;transform:none}
+.pp-route-body>a.pp-route-details{display:flex!important;align-items:center;justify-content:center;width:100%;min-height:46px;margin:12px 0 0!important;padding:12px 16px!important;border:1px solid #d7e5c9!important;border-radius:12px;background:#f4f9ec!important;color:#355d37!important;font:600 14px/1.4 Golos,sans-serif!important;text-decoration:none!important;box-sizing:border-box}
+.pp-route-body>a.pp-route-details:hover{background:#e8f2da!important;border-color:#a6c281!important}
+/* The browser can postpone layout/paint of sections outside the viewport.
+   All content remains in the HTML, accessibility tree and page search. */
+.pp-routes,.pp-fleet,.pp-transfers,.pp-team,.pp-articles,.pp-community,.pp-faq,.pp-steps{content-visibility:auto;contain-intrinsic-size:auto 850px}
+.pp-community{contain-intrinsic-size:auto 330px}.pp-articles{contain-intrinsic-size:auto 650px}.pp-transfers{contain-intrinsic-size:auto 1150px}
+@media(max-width:700px){.pp-routes,.pp-fleet,.pp-team{contain-intrinsic-size:auto 1900px}.pp-transfers{contain-intrinsic-size:auto 1800px}.pp-articles{contain-intrinsic-size:auto 1600px}.pp-community{contain-intrinsic-size:auto 500px}.pp-faq{contain-intrinsic-size:auto 850px}}
+/* Motion keeps its slide effect while text stays readable throughout. */
+.pp-reveal{opacity:1}
+.pp-benefit-tag{color:#56712d!important}.pp-steps a.pp-steps-link{color:#d1efa8!important}
