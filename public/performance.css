@@ -12,3 +12,7 @@
 .pp-reveal{opacity:1}
 .pp-benefit-tag{color:#56712d!important}
 .pp-steps a.pp-steps-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:13px 22px;border-radius:12px;background:#254c35;color:#f5ffe9!important;line-height:1.4;text-decoration:none!important}
+.pp-benefit-routes .pp-benefit-copy>a.pp-benefit-detail{position:static;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;max-width:calc(56% - 12px);margin-top:18px;padding:12px 16px;border:1px solid #d6e5c3;border-radius:12px;background:#edf5df;color:#36572c;font:650 14px/1.35 Golos,sans-serif;text-decoration:none;box-sizing:border-box}
+.pp-benefit-routes .pp-benefit-detail img{flex-shrink:0;width:18px;height:18px}
+.pp-benefit-routes .pp-benefit-copy>a.pp-benefit-detail:hover{background:#dfedcb;color:#21482c;text-decoration:none}
+@media(max-width:600px){.pp-benefit-routes .pp-benefit-copy>a.pp-benefit-detail{max-width:calc(58% - 14px);padding:12px;margin-top:16px;gap:7px}}
