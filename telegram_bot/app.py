@@ -39,7 +39,7 @@ def emoji(symbol):
     return f'<tg-emoji emoji-id="{CUSTOM_EMOJI[symbol]}">{symbol}</tg-emoji>'
 
 
-STATUS = {'pending': emoji('🟠') + ' Ожидает решения', 'confirmed': emoji('🟢') + ' Подтверждена', 'cancelled': emoji('⚪') + ' Отменена', 'rejected': emoji('🔴') + ' Отклонена'}
+STATUS = {'deferred': '⏳ Отложена','pending': emoji('🟠') + ' Ожидает решения', 'confirmed': emoji('🟢') + ' Подтверждена', 'cancelled': emoji('⚪') + ' Отменена', 'rejected': emoji('🔴') + ' Отклонена'}
 
 
 def telegram_reason(error):
@@ -99,6 +99,8 @@ class Store:
           sent_at REAL NOT NULL, expires_at REAL NOT NULL, fingerprint TEXT NOT NULL,
           removed_at REAL, deletion_failed INTEGER NOT NULL DEFAULT 0,
           PRIMARY KEY(booking_id,chat_id))''')
+        if 'booking_id' not in {r[1] for r in self.db.execute('PRAGMA table_info(panels)')}:
+            self.db.execute("ALTER TABLE panels ADD COLUMN booking_id TEXT NOT NULL DEFAULT ''")
         self.db.commit()
 
     def remember_admin(self, chat_id, name):
@@ -113,9 +115,9 @@ class Store:
         row = self.db.execute('SELECT message_id FROM panels WHERE chat_id=?', (chat_id,)).fetchone()
         return row[0] if row else None
 
-    def save_panel(self, chat_id, message_id):
+    def save_panel(self, chat_id, message_id, booking_id=''):
         with self.db:
-            self.db.execute('INSERT OR REPLACE INTO panels VALUES(?,?)', (chat_id, message_id))
+            self.db.execute('INSERT OR REPLACE INTO panels(chat_id,message_id,booking_id) VALUES(?,?,?)', (chat_id, message_id, booking_id))
 
     def visible_cards(self, chat_id):
         return self.db.execute('SELECT * FROM messages WHERE chat_id=? AND removed_at IS NULL', (chat_id,)).fetchall()
@@ -220,16 +222,18 @@ def message_text(b):
             f"{emoji('👤')} <b>{e(b['name'])}</b>\n"
             f"{emoji('📞')} <code>{e(normalized_phone(b['phone']))}</code>\n"
             + (f"\n{emoji('💬')} {e(b['comment'])}\n" if b.get('comment') else '')
-            + "\n<i>Сообщение удалится через 24 часа после отправки. История останется на сайте.</i>")
+            + ("\n<i>Отложена: через 24 часа без изменения статуса заявка будет удалена из бота, сайта и БД.</i>" if b['status'] == 'deferred' else "\n<i>Сообщение удалится через 24 часа после отправки. История останется на сайте.</i>"))
 
 
 def keyboard(b, admin_url):
     rows = [[InlineKeyboardButton(text='Номер', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=normalized_phone(b['phone']))), InlineKeyboardButton(text='Имя', icon_custom_emoji_id='5262659496924180658', copy_text=CopyTextButton(text=b['name']))],
             [InlineKeyboardButton(text='Позвонить', icon_custom_emoji_id=CUSTOM_EMOJI['📞'], url=b['call_url'], style='primary'), InlineKeyboardButton(text='Кабинет', icon_custom_emoji_id='5255703720078879038', url=admin_url)]]
-    if b['status'] == 'pending':
+    if b['status'] in ('pending', 'deferred'):
         rows.append([InlineKeyboardButton(text='Подтвердить', icon_custom_emoji_id=CUSTOM_EMOJI['🟢'], callback_data='b:confirm:' + b['id'], style='success'), InlineKeyboardButton(text='Отклонить', icon_custom_emoji_id=CUSTOM_EMOJI['🔴'], callback_data='b:reject:' + b['id'], style='danger')])
     elif b['status'] == 'confirmed':
         rows.append([InlineKeyboardButton(text='Отменить заявку', callback_data='b:cancel:' + b['id'], style='danger')])
+    if b['status'] in ('pending', 'confirmed'):
+        rows.append([InlineKeyboardButton(text='Отложить на 24 часа', callback_data='b:defer:' + b['id'])])
     rows.append([InlineKeyboardButton(text='Главное меню', icon_custom_emoji_id=CUSTOM_EMOJI['🏠'], callback_data='ui:home')])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
@@ -313,6 +317,7 @@ class Service:
                     message = await self.bot.send_message(admin, message_text(b), reply_markup=keyboard(b, self.admin_url), disable_notification=False)
                     self.store.sent(b['id'], admin, message.message_id, fp, self.clock())
                     await self.replace_window(admin, message.message_id)
+                    self.store.save_panel(admin, message.message_id, b['id'])
                     log('booking_delivered', booking_id=b['id'], chat_id=admin)
                 elif row['fingerprint'] != fp:
                     try:
@@ -333,11 +338,29 @@ class Service:
             except TelegramRetryAfter as error:
                 self.backoff[admin] = now + error.retry_after + 1
                 log('telegram_rate_limit', retry_seconds=error.retry_after)
+        if b['status'] == 'deferred':
+            expires = datetime.fromisoformat(b['updated_at'].replace('Z', '+00:00')).timestamp() + DAY
+            with self.store.db:
+                self.store.db.execute('UPDATE messages SET expires_at=? WHERE booking_id=? AND removed_at IS NULL', (expires, b['id']))
         if all(self.store.find(b['id'], admin) for admin in self.cfg.admins):
             self.store.dequeue(b['id'])
 
     async def sync_once(self):
         async with self.lock:
+            for panel in self.store.db.execute("SELECT * FROM panels WHERE booking_id<>''").fetchall():
+                try:
+                    await self.site.request('bookings/' + panel['booking_id'])
+                except SiteError as error:
+                    if error.status != 404:
+                        raise
+                    try:
+                        await self.bot.delete_message(panel['chat_id'], panel['message_id'])
+                    except TelegramBadRequest:
+                        pass
+                    with self.store.db:
+                        self.store.db.execute('DELETE FROM panels WHERE chat_id=?', (panel['chat_id'],))
+                        self.store.db.execute('DELETE FROM messages WHERE booking_id=? AND chat_id=?', (panel['booking_id'], panel['chat_id']))
+                        self.store.db.execute('DELETE FROM pending WHERE booking_id=?', (panel['booking_id'],))
             await self.delete_expired()
             config = await self.site.request('config')
             self.admin_url = config['admin_url']
@@ -361,7 +384,7 @@ class Service:
         if not callback.from_user or callback.from_user.id not in self.cfg.admins or not callback.message or callback.message.chat.type != 'private' or callback.message.chat.id != callback.from_user.id:
             await callback.answer('Нет доступа', show_alert=True)
             return
-        match = re.fullmatch(r'b:(confirm|reject|cancel):([a-f0-9-]{36})', callback.data or '')
+        match = re.fullmatch(r'b:(confirm|reject|cancel|defer):([a-f0-9-]{36})', callback.data or '')
         if not match:
             await callback.answer('Неизвестное действие', show_alert=True)
             return
@@ -448,6 +471,8 @@ class Service:
             markup = InlineKeyboardMarkup(inline_keyboard=rows)
             existing = self.store.panel(chat_id)
             if existing:
+                self.store.save_panel(chat_id, existing, route[5:] if route.startswith('book:') else '')
+            if existing:
                 try:
                     await self.bot.edit_message_text(text, chat_id=chat_id, message_id=existing, reply_markup=markup)
                     return
@@ -457,7 +482,7 @@ class Service:
                     if 'message to edit not found' not in str(error).lower():
                         raise
             message = await self.bot.send_message(chat_id, text, reply_markup=markup)
-            self.store.save_panel(chat_id, message.message_id)
+            self.store.save_panel(chat_id, message.message_id, route[5:] if route.startswith('book:') else '')
 
     async def navigation(self, callback):
         chat_id = callback.from_user.id
@@ -468,7 +493,7 @@ class Service:
             if row['message_id'] == callback.message.message_id:
                 self.store.removed(row['booking_id'], chat_id, self.clock())
         route = (callback.data or '')[3:]
-        if not re.fullmatch(r'home|list:[0-9]{1,6}|book:[a-f0-9-]{36}|act:(?:confirm|reject|cancel):[a-f0-9-]{36}', route):
+        if not re.fullmatch(r'home|list:[0-9]{1,6}|book:[a-f0-9-]{36}|act:(?:confirm|reject|cancel|defer):[a-f0-9-]{36}', route):
             await callback.answer('Неизвестное действие')
             return
         if route.startswith('act:'):

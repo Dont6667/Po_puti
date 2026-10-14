@@ -43,14 +43,15 @@ export function createBooking(input){
 }
 export function listBookings(){return db.prepare('SELECT id,data,status,created_at,updated_at FROM bookings ORDER BY created_at DESC LIMIT 500').all().map(r=>({...r,...JSON.parse(r.data),data:undefined}));}
 export function changeBooking(id,action){
- if(!['confirm','cancel','reject'].includes(action))throw Error('Неизвестное действие.');
+ purgeDeferredBookings();
+ if(!['confirm','cancel','reject','defer'].includes(action))throw Error('Неизвестное действие.');
  db.exec('BEGIN IMMEDIATE');
  try{
   const b=db.prepare('SELECT * FROM bookings WHERE id=?').get(id);if(!b)throw Error('Заявка не найдена.');
-  const status={confirm:'confirmed',cancel:'cancelled',reject:'rejected'}[action];
+  const status={confirm:'confirmed',cancel:'cancelled',reject:'rejected',defer:'deferred'}[action];
   if(b.status===status){db.exec('COMMIT');return {status};}
   if(action==='confirm'){
-   if(b.status!=='pending')throw Error('Закрытую заявку нельзя подтвердить.');
+   if(!['pending','deferred'].includes(b.status))throw Error('Закрытую заявку нельзя подтвердить.');
    const data=JSON.parse(b.data),trips=availableTrips(data.route,data.date),trip=trips.trips.find(t=>t.time===data.time);
    if(!trip||data.seats.some(s=>s>trip.capacity))throw Error('Рейс или схема мест изменились. Согласуйте поездку заново.');
    for(const seat of data.seats)db.prepare('INSERT INTO confirmed_seats VALUES(?,?,?,?,?)').run(data.route,data.date,data.time,seat,id);
@@ -60,3 +61,16 @@ export function changeBooking(id,action){
   db.exec('COMMIT');return {status};
  }catch(e){db.exec('ROLLBACK');if(e.message.includes('UNIQUE constraint'))throw Error('Одно из мест уже подтверждено другому пассажиру.');throw e;}
 }
+
+export function purgeDeferredBookings(now=Date.now()){
+ const expired=db.prepare("SELECT id FROM bookings WHERE status='deferred' AND julianday(updated_at)<=julianday(?)").all(new Date(now-86400000).toISOString());
+ if(!expired.length)return 0;
+ db.exec('BEGIN IMMEDIATE');
+ try{for(const {id} of expired){
+  db.prepare('DELETE FROM confirmed_seats WHERE booking_id=?').run(id);
+  db.prepare('DELETE FROM booking_audit WHERE booking_id=?').run(id);
+  db.prepare('DELETE FROM bookings WHERE id=?').run(id);
+ }db.exec('COMMIT');return expired.length;}catch(error){db.exec('ROLLBACK');throw error;}
+}
+purgeDeferredBookings();
+setInterval(()=>{try{const count=purgeDeferredBookings();if(count)console.log(JSON.stringify({event:'deferred_bookings_deleted',count}));}catch{console.error(JSON.stringify({event:'deferred_cleanup_failed'}));}},5000).unref();

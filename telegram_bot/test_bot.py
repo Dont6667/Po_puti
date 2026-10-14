@@ -18,7 +18,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TelegramAPIServer
 from aiohttp import web
-from app import CUSTOM_EMOJI, emoji, AdminOnly, DAY, Service, Settings, Store, fingerprint, keyboard, message_text
+from app import CUSTOM_EMOJI, emoji, SiteError, AdminOnly, DAY, Service, Settings, Store, fingerprint, keyboard, message_text
 
 
 class BotTests(unittest.IsolatedAsyncioTestCase):
@@ -157,6 +157,23 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.bot.send_message.await_count, 2)
         self.assertIsNotNone(self.store.find(self.booking['id'], self.cfg.admins[0])['removed_at'])
         self.assertIn('ДИСПЕТЧЕРСКАЯ', self.bot.edit_message_text.call_args.args[0])
+
+    async def test_deferred_status_actions_and_notification_deadline(self):
+        changed = {**self.booking, 'status': 'deferred', 'updated_at': datetime.fromtimestamp(self.now + 600, timezone.utc).isoformat()}
+        await self.service.deliver(changed)
+        self.assertEqual(self.store.find(changed['id'], self.cfg.admins[0])['expires_at'], self.now + 600 + DAY)
+        self.assertIn('Отложена', message_text(changed))
+        self.assertIn('удалена из бота, сайта и БД', message_text(changed))
+        buttons = keyboard(self.booking, self.service.admin_url).inline_keyboard
+        self.assertTrue(any(b.callback_data == 'b:defer:' + changed['id'] for row in buttons for b in row))
+
+    async def test_deleted_booking_removes_open_history_card(self):
+        self.store.save_panel(self.cfg.admins[0], 55, self.booking['id'])
+        self.site.request.side_effect = [SiteError('Заявка не найдена', 404), {'admin_url': self.service.admin_url}]
+        self.site.snapshot.return_value = []
+        await self.service.sync_once()
+        self.bot.delete_message.assert_awaited_with(self.cfg.admins[0], 55)
+        self.assertIsNone(self.store.panel(self.cfg.admins[0]))
 
     async def test_access_only_private_allowlist(self):
         gate = AdminOnly(self.cfg.admins)
