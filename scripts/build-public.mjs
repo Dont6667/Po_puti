@@ -17,13 +17,13 @@ const sources=[...document.querySelectorAll('link[rel=stylesheet]')].map(x=>x.ge
 const css=sources.map(path=>{const bytes=readFileSync('public'+path);if(path.includes('/assets/mirror/')){removed.push(path);return path.includes('8c6add94')?readFileSync('public/legacy-base.css','utf8'):'';}return bytes.toString('utf8');}).join('\n')+'\n'+readFileSync('public/performance.css','utf8');
 const fonts=text=>text.replaceAll('/assets/fonts/golostext.ttf',fontPaths[0]).replaceAll('/assets/fonts/unbounded.ttf',fontPaths[1]);
 const presentClasses=new Set([...document.querySelectorAll('[class]')].flatMap(x=>x.getAttribute('class').split(/\s+/)));
-const runtime=['content.js','intro.js','booking.js','controls.js','analytics.js','images.js'].map(x=>readFileSync('public/'+x,'utf8')).join('\n');
+const runtime=['content.js','intro.js','booking.js','controls.js','analytics.js','images.js','journey.js'].map(x=>readFileSync('public/'+x,'utf8')).join('\n');
 // Keep every runtime class, including dialogs, calendar states and animations.
 // Only remove classes absent from both the HTML and all public runtime sources.
 const unused=[...new Set([...css.matchAll(/\.([a-zA-Z_][\w-]*)/g)].map(x=>x[1]))].filter(x=>!presentClasses.has(x)&&!runtime.includes(x));
 const minify=(name,css)=>save(name,'css',transform({filename:name+'.css',code:Buffer.from(fonts(css)),minify:true,unusedSymbols:name==='home'?unused:[],targets:{chrome:100<<16,safari:15<<16,firefox:100<<16}}).code);
 const homeCss=minify('home',css),readingCss=minify('reading',readFileSync('public/reading.css','utf8')+readFileSync('public/seo.css','utf8'));
-const result=await build({stdin:{contents:['content.js','intro.js','booking.js','controls.js','analytics.js','images.js'].map(x=>`import './${x}';`).join('\n'),resolveDir:process.cwd()+'/public'},bundle:true,minify:true,format:'iife',target:['es2020'],write:false,legalComments:'none'});
+const result=await build({stdin:{contents:['content.js','intro.js','booking.js','controls.js','analytics.js','images.js','journey.js'].map(x=>`import './${x}';`).join('\n'),resolveDir:process.cwd()+'/public'},bundle:true,minify:true,format:'iife',target:['es2020'],write:false,legalComments:'none'});
 const homeJs=save('home','js',result.outputFiles[0].contents);
 const analyticsJs=save('analytics','js',(await build({entryPoints:['public/analytics.js'],minify:true,write:false,target:'es2020'})).outputFiles[0].contents);
 const manifest={homeCss,readingCss,homeJs,analyticsJs,fonts:fontPaths,removedStyles:removed};

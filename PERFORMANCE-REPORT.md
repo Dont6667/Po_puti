@@ -87,4 +87,6 @@ docker compose -f compose.production.yaml logs --tail=100 website proxy
 
 ## Изменённые файлы
 
+После проверки заказчиком восстановлен обработчик движения машинки и солнца в отдельном `public/journey.js`: он запускается при приближении нижнего блока к экрану, использует один requestAnimationFrame на прокрутку и учитывает `prefers-reduced-motion`. Проверено фактическое изменение положения на 320/390/768/1440 px. Ссылка под дорогой оформлена контрастной тёмно-зелёной кнопкой. Исправление входит в публичную сборку.
+
 `seo.mjs`, `performance.mjs`, `server.mjs`, `package.json`, `package-lock.json`, `Dockerfile`, `deploy/start.sh`; `scripts/build-public.mjs`, `scripts/prepare-hero.mjs`, `scripts/prepare-fonts.py`; `public/content.js`, `public/images.js`, `public/controls.js`, `public/performance.css`, `public/legacy-base.css`, `public/reading.css`, три HTML-файла статей; `public/assets/image-manifest.json`, подготовленные WOFF2/AVIF и хешированные файлы `public/assets/built/`; тесты бронирования/SEO, этот отчёт и сводка результатов.

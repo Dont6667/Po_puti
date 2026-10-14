@@ -10,4 +10,5 @@
 @media(max-width:700px){.pp-routes,.pp-fleet,.pp-team{contain-intrinsic-size:auto 1900px}.pp-transfers{contain-intrinsic-size:auto 1800px}.pp-articles{contain-intrinsic-size:auto 1600px}.pp-community{contain-intrinsic-size:auto 500px}.pp-faq{contain-intrinsic-size:auto 850px}}
 /* Motion keeps its slide effect while text stays readable throughout. */
 .pp-reveal{opacity:1}
-.pp-benefit-tag{color:#56712d!important}.pp-steps a.pp-steps-link{color:#d1efa8!important}
+.pp-benefit-tag{color:#56712d!important}
+.pp-steps a.pp-steps-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:13px 22px;border-radius:12px;background:#254c35;color:#f5ffe9!important;line-height:1.4;text-decoration:none!important}
