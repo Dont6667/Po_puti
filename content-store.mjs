@@ -9,6 +9,23 @@ defaults.drivers=[{name:'Александр',experience:15,image:'/assets/driver
 const seedPath=new URL('./initial-content.json',import.meta.url);
 const initial=existsSync(seedPath)?JSON.parse(readFileSync(seedPath,'utf8')):defaults;
 db.prepare('INSERT OR IGNORE INTO settings(id,content) VALUES(1,?)').run(JSON.stringify(initial));
+// Apply the owner's requested update to existing installations once. Later
+// admin edits remain authoritative and are not reset when the server restarts.
+db.exec('CREATE TABLE IF NOT EXISTS content_migrations (id TEXT PRIMARY KEY)');
+const priceAndCarMigration='2026-10-14-routes-2200-white-alphard';
+if(!db.prepare('SELECT id FROM content_migrations WHERE id=?').get(priceAndCarMigration)){
+ db.exec('BEGIN IMMEDIATE');
+ try{
+  const row=db.prepare('SELECT content FROM settings WHERE id=1').get();const content=JSON.parse(row.content);
+  content.routes=content.routes.map(route=>({...route,price:2200,priceFrom:false}));
+  content.images={...content.images,comfortCar:'/assets/comfort-alphard-white.png'};
+  const alphard=content.fleet.findIndex(car=>/alphard/i.test(car.name));
+  if(alphard>0)content.fleet.unshift(content.fleet.splice(alphard,1)[0]);
+  else if(alphard<0)content.fleet.unshift({name:'Toyota Alphard',count:1,image:'/assets/alphard-russian.jpg'});
+  db.prepare('UPDATE settings SET content=?,revision=revision+1 WHERE id=1').run(JSON.stringify(content));
+  db.prepare('INSERT INTO content_migrations(id) VALUES(?)').run(priceAndCarMigration);db.exec('COMMIT');
+ }catch(error){db.exec('ROLLBACK');throw error;}
+}
 export function readContent(){const row=db.prepare('SELECT content,revision FROM settings WHERE id=1').get();const content=JSON.parse(row.content);content.driverSection=content.driverSection??{active:true,title:'Наши водители',description:'Опыт, внимание и забота в каждой поездке.'};content.drivers=content.drivers??structuredClone(defaults.drivers);content.contacts={...defaults.contacts,...content.contacts};if(content.contacts.whatsapp===undefined)content.contacts.whatsapp='https://wa.me/'+content.contacts.phone.replace(/\D/g,'');delete content.contacts.vk;content.images={...defaults.images,...content.images};const articleUpdates={articleShira:['/assets/mirror/0eeaf37cdcc6cfecc40c.webp','/assets/places/lake-shira-client.jpg'],articleLake:['/assets/khakassia.jpg','/assets/places/ancestors-client.png'],articleTuim:['/assets/mirror/e7c7753f5cef0b3ae8c5.webp','/assets/places/tuim-client.jpg']};for(const [key,[old,next]] of Object.entries(articleUpdates)){if(content.images[key]===old)content.images[key]=next;}content.routes=content.routes.map(r=>({...r,capacity:r.capacity||7,times:r.times||'08:00, 11:00, 15:00, 17:00'}));return {...content,revision:row.revision};}
 function txt(x,max=200){if(typeof x!=='string'||x.length>max||/[\u0000-\u0008]/.test(x))throw Error('Некорректный текст');return x.trim();}
 function image(x){x=txt(x,200);if(x==='/assets/route-journey.svg')return x;if(!/^\/assets\/[a-zA-Z0-9_./-]+\.(jpg|jpeg|png|webp)$/i.test(x)||x.includes('..'))throw Error('Выберите локальное изображение');return x;}

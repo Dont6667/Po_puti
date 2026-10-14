@@ -8,8 +8,8 @@
       "via": "Балахта · Новосёлово",
       "duration": "≈ 4 часа",
       "times": "08:00, 11:00, 15:00, 17:00",
-      "price": 1000,
-      "priceFrom": true,
+      "price": 2200,
+      "priceFrom": false,
       "type": "Регулярный рейс",
       "image": "/assets/places/shira.jpg",
       "imageAlt": "Озеро Шира",
@@ -23,8 +23,8 @@
       "via": "Новосёлово · Балахта",
       "duration": "≈ 4 часа",
       "times": "08:00, 11:00, 15:00, 17:00",
-      "price": 1000,
-      "priceFrom": true,
+      "price": 2200,
+      "priceFrom": false,
       "type": "Обратный маршрут",
       "image": "/assets/places/krasnoyarsk.jpg",
       "imageAlt": "Красноярск с высоты Столбов",
@@ -38,7 +38,7 @@
       "via": "Через Абакан",
       "duration": "≈ 6–7 часов",
       "times": "08:00, 11:00, 15:00, 17:00",
-      "price": 2500,
+      "price": 2200,
       "priceFrom": false,
       "type": "Регулярный рейс",
       "image": "/assets/places/minusinsk.jpg",
@@ -53,8 +53,8 @@
       "via": "Индивидуальная поездка",
       "duration": "≈ 6–7 часов",
       "times": "08:00, 11:00, 15:00, 17:00",
-      "price": 23000,
-      "priceFrom": true,
+      "price": 2200,
+      "priceFrom": false,
       "type": "Трансфер",
       "image": "/assets/places/priiskovoye.jpg",
       "imageAlt": "Приисковое, Хакасия",
@@ -79,21 +79,21 @@
     "logo": "/assets/po-puti-logo.png",
     "journey": "/assets/mirror/5eb81ffd6865af9238a8.jpg",
     "salon": "",
-    "comfortCar": "/assets/comfort-minivan-cutout.png",
+    "comfortCar": "/assets/comfort-alphard-white.png",
     "comfortDriver": "/assets/driver-andrey-car.png",
     "comfortRoutes": "/assets/comfort-road.png",
     "transferHero": "/assets/transfer-banner-sage.png"
   },
   "fleet": [
     {
-      "name": "Toyota Vellfire",
-      "count": 3,
-      "image": "/assets/vellfire-russian.jpg"
-    },
-    {
       "name": "Toyota Alphard",
       "count": 5,
       "image": "/assets/alphard-russian.jpg"
+    },
+    {
+      "name": "Toyota Vellfire",
+      "count": 3,
+      "image": "/assets/vellfire-russian.jpg"
     },
     {
       "name": "Honda Stepwgn",

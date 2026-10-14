@@ -32,6 +32,10 @@ try{
  const {csrf}=await login.json(),cookie=login.headers.get('set-cookie').split(';')[0],headers={Cookie:cookie,'X-CSRF-Token':csrf};
  const original=await json('/api/content');assert.equal(original.drivers.length,3);const changed=structuredClone(original);changed.contacts.phone='+7 999 123-45-67';changed.contacts.telegram='';changed.routes[0].capacity=8;
  const photo=await readFile(new URL('../public/assets/po-puti-logo.png',import.meta.url));const uploaded=await call('/api/admin/upload','POST',{data:'data:image/png;base64,'+photo.toString('base64')},headers);assert.equal(uploaded.status,200);const uploadedPath=(await uploaded.json()).path;
+ assert.ok(original.routes.every(route=>route.price===2200&&!route.priceFrom));
+ assert.equal(original.images.comfortCar,'/assets/comfort-alphard-white.png');
+ assert.equal(original.fleet[0].name,'Toyota Alphard');
+ changed.routes[0].price=2400; // A later admin price must survive restarts.
  const carPhoto=await readFile(new URL('../public/assets/vellfire-russian.jpg',import.meta.url));
  const cutoutResponse=await call('/api/admin/upload','POST',{data:'data:image/jpeg;base64,'+carPhoto.toString('base64'),removeBackground:'car'},headers);assert.equal(cutoutResponse.status,200);
  const cutoutPath=(await cutoutResponse.json()).path;assert.ok(cutoutPath.endsWith('.png'));
@@ -69,6 +73,7 @@ try{
  assert.equal((await call('/api/bookings','POST',{...data,token:randomBytes(20).toString('hex')})).status,400);
  const list=await (await call('/api/admin/bookings','GET',undefined,headers)).json();assert.equal(list.bookings.length,2);assert.equal(list.bookings.find(b=>b.id===rival.id).status,'pending');
  await stop();await start();assert.deepEqual((await json(url)).trips[0].occupied,[1,2]);assert.equal((await json('/api/content')).contacts.phone,changed.contacts.phone);
+ assert.equal((await json('/api/content')).routes[0].price,2400);
  assert.equal((await json('/api/content')).drivers[0].image,uploadedPath);assert.equal((await json('/api/content')).drivers[0].experience,18);
  assert.equal((await call('/api/admin/session','GET',undefined,headers)).status,401);
  const relogin=await call('/api/admin/login','POST',{password}),newCookie=relogin.headers.get('set-cookie').split(';')[0],newCsrf=(await relogin.json()).csrf,newHeaders={Cookie:newCookie,'X-CSRF-Token':newCsrf};

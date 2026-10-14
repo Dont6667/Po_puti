@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {parseHTML} from 'linkedom';
 await import('./prepare-hero.mjs');
 await import('./prepare-transfer.mjs');
+await import('./prepare-comfort-car.mjs');
 const directory='public/assets/built';mkdirSync(directory,{recursive:true});
 const hash=buffer=>createHash('sha256').update(buffer).digest('hex').slice(0,12);
 const save=(name,extension,buffer)=>{const path=`/assets/built/${name}-${hash(buffer)}.${extension}`;writeFileSync('public'+path,buffer);return path;};
