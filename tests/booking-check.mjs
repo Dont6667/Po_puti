@@ -14,15 +14,19 @@ try{
  await writeFile(join(root,'public','index.html'),'<html>test</html>');
  const password=randomBytes(20).toString('hex'),salt=randomBytes(16).toString('hex');
  await writeFile(join(root,'data','auth.json'),JSON.stringify({salt,hash:scryptSync(password,salt,64).toString('hex')}));
+ await writeFile(join(root,'data','admin-access.txt'),'Адрес кабинета: http://127.0.0.1:3001/manage-obsolete\nПароль: '+password+'\n');
  const portServer=createServer();await new Promise(r=>portServer.listen(0,'127.0.0.1',r));const port=portServer.address().port;await new Promise(r=>portServer.close(r));
  const base=`http://127.0.0.1:${port}`;
- async function start(){child=spawn(process.execPath,[join(root,'server.mjs')],{env:{...process.env,PORT:String(port),HOST:'127.0.0.1'},stdio:'pipe'});for(let i=0;i<100;i++){try{if((await fetch(base+'/api/health')).ok)return;}catch{}if(child.exitCode!==null)throw Error('Test server failed');await new Promise(r=>setTimeout(r,50));}throw Error('Test server timeout');}
+ async function start(){child=spawn(process.execPath,[join(root,'server.mjs')],{env:{...process.env,PORT:String(port),HOST:'127.0.0.1',PUBLIC_ORIGIN:'https://poputi-vmeste.ru'},stdio:'pipe'});for(let i=0;i<100;i++){try{if((await fetch(base+'/api/health')).ok)return;}catch{}if(child.exitCode!==null)throw Error('Test server failed');await new Promise(r=>setTimeout(r,50));}throw Error('Test server timeout');}
  async function stop(){const exited=new Promise(r=>child.once('exit',r));child.kill();await exited;child=null;}
  async function call(path,method='GET',data,headers={}){return fetch(base+path,{method,headers:{'Content-Type':'application/json',Origin:base,...headers},...(data===undefined?{}:{body:JSON.stringify(data)})});}
  const json=async(path)=>{const r=await call(path);assert.equal(r.status,200);return r.json();};
  await start();
  const privateAdminPath=(await readFile(join(root,'data','admin-route.txt'),'utf8')).trim();
  assert.ok(privateAdminPath.startsWith('/manage-'));
+ const access=await readFile(join(root,'data','admin-access.txt'),'utf8');
+ assert.equal(access.split('\n')[0],'Адрес кабинета: https://poputi-vmeste.ru'+privateAdminPath);
+ assert.ok(access.includes('Пароль: '+password));
  assert.equal((await fetch(base+'/admin')).status,404);assert.equal((await fetch(base+'/admin.html')).status,404);
  for(const privateFile of ['/data/auth.json','/data/content.sqlite','/data/admin-access.txt','/data/admin-route.txt'])assert.equal((await fetch(base+privateFile)).status,404);
  assert.equal((await fetch(base+'/')).headers.get('x-frame-options'),'DENY');

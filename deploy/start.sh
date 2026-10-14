@@ -12,5 +12,5 @@ command -v docker >/dev/null || { echo 'Install Docker first: see DEPLOY.md'; ex
 docker compose -f compose.production.yaml run --rm --no-deps proxy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 docker compose -f compose.production.yaml up -d --build --wait --wait-timeout 300
 docker compose -f compose.production.yaml exec -T proxy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
-echo 'Admin access (use your domain instead of the internal host):'
+echo 'Admin access:'
 docker compose -f compose.production.yaml exec -T website cat /app/data/admin-access.txt

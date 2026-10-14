@@ -5,6 +5,7 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: 3001
+      PUBLIC_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}
       COOKIE_SECURE: 1
       METRICA_ID: ${METRICA_ID:-}
       GA4_ID: ${GA4_ID:-}
