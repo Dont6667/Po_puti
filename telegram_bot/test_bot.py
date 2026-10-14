@@ -12,7 +12,7 @@ import unittest
 from unittest.mock import AsyncMock
 
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.methods import DeleteMessage
+from aiogram.methods import DeleteMessage, SendMessage
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -122,6 +122,18 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         markup = self.bot.edit_message_text.call_args.kwargs['reply_markup']
         self.assertTrue(markup.inline_keyboard[2][0].callback_data.startswith('ui:act:confirm:'))
         self.assertNotIn('Сообщение удалится', self.bot.edit_message_text.call_args.args[0])
+
+    async def test_unstarted_admin_does_not_block_other_admin_or_future_bookings(self):
+        self.bot.send_message.side_effect = [
+            TelegramBadRequest(method=SendMessage(chat_id=1, text='test'), message='Bad Request: chat not found'),
+            SimpleNamespace(message_id=22), SimpleNamespace(message_id=23)]
+        await self.service.deliver(self.booking)
+        self.assertIsNone(self.store.find(self.booking['id'], self.cfg.admins[0]))
+        self.assertIsNotNone(self.store.find(self.booking['id'], self.cfg.admins[1]))
+        newer = {**self.booking, 'id': '22345678-1234-1234-1234-123456789abc'}
+        await self.service.deliver(newer)
+        self.assertIsNotNone(self.store.find(newer['id'], self.cfg.admins[1]))
+        self.assertIn(self.booking['id'], self.store.outstanding(self.now))
 
     async def test_access_only_private_allowlist(self):
         gate = AdminOnly(self.cfg.admins)

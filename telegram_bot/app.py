@@ -41,6 +41,24 @@ def emoji(symbol):
 STATUS = {'pending': emoji('🟠') + ' Ожидает решения', 'confirmed': emoji('🟢') + ' Подтверждена', 'cancelled': emoji('⚪') + ' Отменена', 'rejected': emoji('🔴') + ' Отклонена'}
 
 
+def telegram_reason(error):
+    reason = str(error).lower()
+    for fragment, label in [
+        ('chat not found', 'chat_not_started_or_missing'),
+        ('user not found', 'user_not_found'),
+        ('emoji', 'custom_emoji_rejected'),
+        ('parse entities', 'message_markup_rejected'),
+        ('button_url', 'button_url_rejected'),
+        ('wrong http url', 'button_url_rejected'),
+        ('message to edit not found', 'message_missing'),
+        ('message is not modified', 'message_unchanged'),
+        ('message to delete not found', 'message_missing'),
+    ]:
+        if fragment in reason:
+            return label
+    return 'telegram_bad_request'
+
+
 def log(event, **fields):
     # Never log Bot API URLs, tokens, passenger names, numbers or comments.
     print(json.dumps({'time': datetime.now(timezone.utc).isoformat(), 'event': event, **fields}, ensure_ascii=False), flush=True)
@@ -249,6 +267,9 @@ class Service:
                     missing = 'not found' in reason
                     self.store.removed(row['booking_id'], row['chat_id'], now, failed=not missing)
                     log('message_delete_missing' if missing else 'message_delete_unavailable', booking_id=row['booking_id'], chat_id=row['chat_id'])
+                elif 'chat not found' in reason:
+                    self.backoff[row['chat_id']] = now + 60
+                    log('delete_chat_unavailable', chat_id=row['chat_id'], reason=telegram_reason(error))
                 else:
                     raise
         self.store.cleanup(now)
@@ -280,6 +301,9 @@ class Service:
                                 continue
                             raise
                     self.store.updated(b['id'], admin, fp)
+            except TelegramBadRequest as error:
+                self.backoff[admin] = now + 60
+                log('booking_delivery_rejected', booking_id=b['id'], chat_id=admin, reason=telegram_reason(error))
             except TelegramForbiddenError:
                 self.backoff[admin] = now + 60
                 log('admin_chat_unavailable', chat_id=admin)
@@ -438,7 +462,7 @@ class Service:
             except asyncio.CancelledError:
                 raise
             except Exception as error:
-                log('sync_retry', error_type=type(error).__name__)
+                log('sync_retry', error_type=type(error).__name__, reason=telegram_reason(error) if isinstance(error, TelegramBadRequest) else 'retryable_failure')
             await asyncio.sleep(self.cfg.interval)
 
     async def watchdog(self):
