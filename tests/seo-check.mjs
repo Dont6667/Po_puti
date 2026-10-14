@@ -7,7 +7,7 @@ import {createServer} from 'node:net';
 import {parseHTML,DOMParser} from 'linkedom';
 const root=await mkdtemp(join(tmpdir(),'po-puti-seo-'));let child;
 try{
- for(const file of ['server.mjs','seo.mjs','performance.mjs','admin-route.mjs','admin-api.mjs','content-store.mjs','booking-store.mjs','photo-background.mjs','photo-worker.mjs','initial-content.json'])await copyFile(resolve(file),join(root,file));
+ for(const file of ['server.mjs','telegram-integration.mjs','seo.mjs','performance.mjs','admin-route.mjs','admin-api.mjs','content-store.mjs','booking-store.mjs','photo-background.mjs','photo-worker.mjs','initial-content.json'])await copyFile(resolve(file),join(root,file));
  await symlink(resolve('node_modules'),join(root,'node_modules'),'junction');await symlink(resolve('public'),join(root,'public'),'junction');await mkdir(join(root,'data'));
  const socket=createServer();await new Promise(r=>socket.listen(0,'127.0.0.1',r));const port=socket.address().port;await new Promise(r=>socket.close(r));
  child=spawn(process.execPath,[join(root,'server.mjs')],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),METRICA_ID:'',GA4_ID:''},stdio:'pipe'});const base='http://127.0.0.1:'+port;
@@ -15,6 +15,7 @@ try{
  const sitemap=await fetch(base+'/sitemap.xml');assert.equal(sitemap.status,200);const xml=new DOMParser().parseFromString(await sitemap.text(),'text/xml');const paths=[...xml.querySelectorAll('loc')].map(e=>new URL(e.textContent).pathname);assert.equal(paths.length,new Set(paths).size);assert.ok(paths.length>=10);
  assert.equal(xml.documentElement.localName,'urlset');
  assert.equal(xml.documentElement.getAttribute('xmlns'),'http://www.sitemaps.org/schemas/sitemap/0.9');
+ assert.equal((await fetch(base+'/api/internal/telegram/bookings')).status,404);
  const homeResponse=await fetch(base+'/',{headers:{'Accept-Encoding':'gzip'}});assert.equal(homeResponse.headers.get('content-encoding'),'gzip');assert.equal(homeResponse.headers.get('cache-control'),'no-store');
  const homeDocument=parseHTML(await homeResponse.text()).document;
  assert.equal(homeDocument.querySelectorAll('link[rel=stylesheet]').length,0);

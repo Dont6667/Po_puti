@@ -1,5 +1,7 @@
 {$DOMAIN} {
     encode zstd gzip
+    @telegram_internal path /api/internal/telegram/*
+    respond @telegram_internal 404
     reverse_proxy website:3001
 }
 

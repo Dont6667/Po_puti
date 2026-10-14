@@ -3,5 +3,10 @@ node_modules/
 data/
 public/assets/uploads/
 .env
+.env.*
+!.env.example
 *.zip
 backups/
+__pycache__/
+*.pyc
+telegram_bot/state/

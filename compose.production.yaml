@@ -6,6 +6,8 @@ services:
       HOST: 0.0.0.0
       PORT: 3001
       PUBLIC_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}
+      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY:-}
+      TELEGRAM_ADMIN_IDS: ${TELEGRAM_ADMIN_IDS:-6056397902,5673533667}
       COOKIE_SECURE: 1
       METRICA_ID: ${METRICA_ID:-}
       GA4_ID: ${GA4_ID:-}
@@ -15,6 +17,28 @@ services:
     cap_drop: ["ALL"]
     logging:
       options: {max-size: "10m", max-file: "3"}
+  telegram-bot:
+    profiles: ["telegram"]
+    build:
+      context: .
+      dockerfile: telegram_bot/Dockerfile
+    restart: unless-stopped
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY:-}
+      TELEGRAM_ADMIN_IDS: ${TELEGRAM_ADMIN_IDS:-6056397902,5673533667}
+      SITE_API_URL: http://website:3001
+      BOT_POLL_SECONDS: 5
+    volumes: ["telegram-data:/app/state"]
+    init: true
+    read_only: true
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    logging:
+      options: {max-size: "10m", max-file: "3"}
+    depends_on:
+      website: {condition: service_healthy}
   proxy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -25,6 +49,7 @@ services:
     depends_on:
       website: {condition: service_healthy}
 volumes:
+  telegram-data:
   site-data:
   site-uploads:
   caddy-data:

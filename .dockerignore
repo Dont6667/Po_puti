@@ -3,8 +3,12 @@
 .agents
 .codex
 data
+backups
 tests
 node_modules
 *.zip
 .env
+.env.*
+telegram_bot/state
+__pycache__
 public/assets/uploads

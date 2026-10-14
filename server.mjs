@@ -1,6 +1,7 @@
 import {adminPath} from './admin-route.mjs';
 import {api} from './admin-api.mjs';
 import {publicSeo} from './seo.mjs';
+import {telegramApi} from './telegram-integration.mjs';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
@@ -31,6 +32,7 @@ function send(req,res,data,responseHeaders){
 createServer(async(req,res)=>{
  try{
   const path=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+  if(await telegramApi(req,res,path))return;
   if(await api(req,res,path))return;
   if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,headers);res.end();return;}
   if(path.includes('..')||path==='/admin'||path==='/admin.html')throw Error();
