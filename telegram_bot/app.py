@@ -224,8 +224,8 @@ def message_text(b):
 
 
 def keyboard(b, admin_url):
-    rows = [[InlineKeyboardButton(text='Номер', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=normalized_phone(b['phone']))), InlineKeyboardButton(text='Имя', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=b['name']))],
-            [InlineKeyboardButton(text='Позвонить', icon_custom_emoji_id=CUSTOM_EMOJI['📞'], url=b['call_url'], style='primary'), InlineKeyboardButton(text='↗ Кабинет', url=admin_url)]]
+    rows = [[InlineKeyboardButton(text='Номер', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], copy_text=CopyTextButton(text=normalized_phone(b['phone']))), InlineKeyboardButton(text='Имя', icon_custom_emoji_id='5262659496924180658', copy_text=CopyTextButton(text=b['name']))],
+            [InlineKeyboardButton(text='Позвонить', icon_custom_emoji_id=CUSTOM_EMOJI['📞'], url=b['call_url'], style='primary'), InlineKeyboardButton(text='Кабинет', icon_custom_emoji_id='5255703720078879038', url=admin_url)]]
     if b['status'] == 'pending':
         rows.append([InlineKeyboardButton(text='Подтвердить', icon_custom_emoji_id=CUSTOM_EMOJI['🟢'], callback_data='b:confirm:' + b['id'], style='success'), InlineKeyboardButton(text='Отклонить', icon_custom_emoji_id=CUSTOM_EMOJI['🔴'], callback_data='b:reject:' + b['id'], style='danger')])
     elif b['status'] == 'confirmed':

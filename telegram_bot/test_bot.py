@@ -91,7 +91,8 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn('💺', CUSTOM_EMOJI)
         buttons = keyboard(self.booking, 'https://example.test/admin').inline_keyboard
         self.assertEqual(buttons[0][0].icon_custom_emoji_id, CUSTOM_EMOJI['📋'])
-        self.assertEqual(buttons[0][1].icon_custom_emoji_id, CUSTOM_EMOJI['📋'])
+        self.assertEqual(buttons[0][1].icon_custom_emoji_id, '5262659496924180658')
+        self.assertEqual(buttons[1][1].icon_custom_emoji_id, '5255703720078879038')
         self.assertEqual(buttons[1][0].icon_custom_emoji_id, CUSTOM_EMOJI['📞'])
         self.assertEqual(buttons[1][0].text, 'Позвонить')
         self.assertEqual(buttons[2][0].icon_custom_emoji_id, CUSTOM_EMOJI['🟢'])
