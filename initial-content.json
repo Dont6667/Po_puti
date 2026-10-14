@@ -73,9 +73,9 @@
   "images": {
     "hero": "/assets/fleet.jpg",
     "contact": "/assets/fleet.jpg",
-    "articleShira": "/assets/mirror/0eeaf37cdcc6cfecc40c.webp",
-    "articleLake": "/assets/khakassia.jpg",
-    "articleTuim": "/assets/mirror/e7c7753f5cef0b3ae8c5.webp",
+    "articleShira": "/assets/places/lake-shira-client.jpg",
+    "articleLake": "/assets/places/ancestors-client.png",
+    "articleTuim": "/assets/places/tuim-client.jpg",
     "logo": "/assets/po-puti-logo.png",
     "journey": "/assets/mirror/5eb81ffd6865af9238a8.jpg",
     "salon": "",
