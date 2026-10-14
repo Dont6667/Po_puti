@@ -3,12 +3,13 @@
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const loader=document.querySelector('.pp-intro');if(!loader)return;
  const content=loader.querySelector('.pp-intro-content'),logo=content.querySelector('img');logo.className='pp-intro-logo';logo.src='/assets/po-puti-logo-crisp.svg';
- history.scrollRestoration='manual';if(location.hash)history.replaceState(null,'',location.pathname+location.search);window.scrollTo({top:0,left:0,behavior:'instant'});
+ const initialHash=location.hash;
+ if(!initialHash){history.scrollRestoration='manual';window.scrollTo({top:0,left:0,behavior:'instant'});}
  const stage=document.createElement('div');stage.className='pp-intro-stage';logo.before(stage);stage.append(logo);
  const car=document.createElement('span');car.className='pp-intro-car';car.setAttribute('aria-hidden','true');stage.append(car);
  async function dismiss(){
   if(finished)return;finished=true;
-  window.scrollTo({top:0,left:0,behavior:'instant'});
+  if(!initialHash)window.scrollTo({top:0,left:0,behavior:'instant'});
   const target=document.querySelector('.pp-header .pp-brand img');
   try{
    if(!reduced&&target&&scrollY<100){

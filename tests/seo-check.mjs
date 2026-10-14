@@ -21,6 +21,8 @@ try{
  assert.equal(homeDocument.querySelectorAll('link[rel=stylesheet]').length,0);
  assert.equal(homeDocument.querySelectorAll('script[src]').length,1);
  assert.ok(homeDocument.querySelector('#pp-public-styles'));
+ assert.equal(homeDocument.querySelectorAll('.pp-intro').length,1,'Intro animation must retain its HTML stage');
+ assert.ok(homeDocument.querySelector('.pp-intro-content img'));
  const bundled=await fetch(base+homeDocument.querySelector('script[src]').getAttribute('src'));assert.ok(bundled.headers.get('cache-control').includes('immutable'));
  assert.equal((await fetch(base+homeDocument.querySelector('script[src]').getAttribute('src'),{headers:{'If-None-Match':bundled.headers.get('etag')}})).status,304);
  const titles=new Set(),descriptions=new Set(),h1s=new Set();let links=0;
