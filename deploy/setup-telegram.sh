@@ -6,8 +6,8 @@ umask 077
 read -r -s -p 'BotFather token (hidden): ' telegram_token
 printf '\n'
 [[ "$telegram_token" =~ ^[0-9]+:[A-Za-z0-9_-]{30,}$ ]] || { echo 'Invalid bot token format.'; exit 1; }
-read -r -p 'Admin IDs [6056397902,5673533667]: ' telegram_admins
-telegram_admins="${telegram_admins:-6056397902,5673533667}"
+read -r -p 'Admin IDs [6056397902,5673533667,923586346]: ' telegram_admins
+telegram_admins="${telegram_admins:-6056397902,5673533667,923586346}"
 [[ "$telegram_admins" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo 'Use comma-separated numeric user IDs.'; exit 1; }
 telegram_key="$(awk -F= '$1=="TELEGRAM_API_KEY"{print substr($0,index($0,"=")+1)}' .env | tail -1)"
 if [[ ! "$telegram_key" =~ ^[a-f0-9]{64}$ ]]; then
