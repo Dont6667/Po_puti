@@ -135,6 +135,28 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(self.store.find(newer['id'], self.cfg.admins[1]))
         self.assertIn(self.booking['id'], self.store.outstanding(self.now))
 
+    async def test_new_booking_removes_menu_and_previous_booking_window(self):
+        admin = self.cfg.admins[0]
+        self.store.save_panel(admin, 90)
+        await self.service.deliver(self.booking)
+        self.bot.delete_message.assert_any_await(admin, 90)
+        self.assertEqual(self.store.panel(admin), 11)
+        self.bot.send_message.side_effect = [SimpleNamespace(message_id=33), SimpleNamespace(message_id=44)]
+        newer = {**self.booking, 'id': '22345678-1234-1234-1234-123456789abc'}
+        await self.service.deliver(newer)
+        self.bot.delete_message.assert_any_await(admin, 11)
+        self.assertEqual(self.store.panel(admin), 33)
+        self.assertIsNotNone(self.store.find(self.booking['id'], admin)['removed_at'])
+        self.assertEqual(keyboard(newer, self.service.admin_url).inline_keyboard[-1][0].icon_custom_emoji_id, '5240118799885158175')
+
+    async def test_notification_home_reuses_card_and_stops_card_sync(self):
+        await self.service.deliver(self.booking)
+        callback = SimpleNamespace(from_user=SimpleNamespace(id=self.cfg.admins[0]), message=SimpleNamespace(message_id=11), data='ui:home', answer=AsyncMock())
+        await self.service.navigation(callback)
+        self.assertEqual(self.bot.send_message.await_count, 2)
+        self.assertIsNotNone(self.store.find(self.booking['id'], self.cfg.admins[0])['removed_at'])
+        self.assertIn('ДИСПЕТЧЕРСКАЯ', self.bot.edit_message_text.call_args.args[0])
+
     async def test_access_only_private_allowlist(self):
         gate = AdminOnly(self.cfg.admins)
         handler = AsyncMock()

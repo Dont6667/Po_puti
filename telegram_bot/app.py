@@ -24,6 +24,7 @@ from aiogram.types import CopyTextButton, InlineKeyboardButton, InlineKeyboardMa
 DAY = 86400
 KRASNOYARSK = timezone(timedelta(hours=7))
 CUSTOM_EMOJI = {
+    '🏠': '5240118799885158175',
     '🚐': '5291971905690026986',
     '📞': '6041650621776401666', '🟠': '5846127793313681804',
     '🟢': '5845901478601953249', '⚪': '5846127793313681804',
@@ -115,6 +116,9 @@ class Store:
     def save_panel(self, chat_id, message_id):
         with self.db:
             self.db.execute('INSERT OR REPLACE INTO panels VALUES(?,?)', (chat_id, message_id))
+
+    def visible_cards(self, chat_id):
+        return self.db.execute('SELECT * FROM messages WHERE chat_id=? AND removed_at IS NULL', (chat_id,)).fetchall()
 
     def find(self, booking_id, chat_id):
         return self.db.execute('SELECT * FROM messages WHERE booking_id=? AND chat_id=?', (booking_id, chat_id)).fetchone()
@@ -226,6 +230,7 @@ def keyboard(b, admin_url):
         rows.append([InlineKeyboardButton(text='Подтвердить', icon_custom_emoji_id=CUSTOM_EMOJI['🟢'], callback_data='b:confirm:' + b['id'], style='success'), InlineKeyboardButton(text='Отклонить', icon_custom_emoji_id=CUSTOM_EMOJI['🔴'], callback_data='b:reject:' + b['id'], style='danger')])
     elif b['status'] == 'confirmed':
         rows.append([InlineKeyboardButton(text='Отменить заявку', callback_data='b:cancel:' + b['id'], style='danger')])
+    rows.append([InlineKeyboardButton(text='Главное меню', icon_custom_emoji_id=CUSTOM_EMOJI['🏠'], callback_data='ui:home')])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -244,6 +249,23 @@ class Service:
         self.last_telegram = self.clock()
         self.backoff = {}
         self.cutoff = self.store.setting('activated_since', self.clock() - DAY)
+
+    async def replace_window(self, chat_id, keep_id):
+        previous = self.store.panel(chat_id)
+        candidates = {row['message_id'] for row in self.store.visible_cards(chat_id)}
+        if previous:
+            candidates.add(previous)
+        for message_id in candidates - {keep_id}:
+            try:
+                await self.bot.delete_message(chat_id, message_id)
+            except TelegramBadRequest as error:
+                if 'not found' not in str(error).lower():
+                    log('window_delete_unavailable', chat_id=chat_id, reason=telegram_reason(error))
+                    continue
+            for row in self.store.visible_cards(chat_id):
+                if row['message_id'] == message_id:
+                    self.store.removed(row['booking_id'], chat_id, self.clock())
+        self.store.save_panel(chat_id, keep_id)
 
     async def delete_expired(self):
         now = self.clock()
@@ -290,6 +312,7 @@ class Service:
                 if not row:
                     message = await self.bot.send_message(admin, message_text(b), reply_markup=keyboard(b, self.admin_url), disable_notification=False)
                     self.store.sent(b['id'], admin, message.message_id, fp, self.clock())
+                    await self.replace_window(admin, message.message_id)
                     log('booking_delivered', booking_id=b['id'], chat_id=admin)
                 elif row['fingerprint'] != fp:
                     try:
@@ -368,6 +391,9 @@ class Service:
 
     async def panel(self, chat_id, route='home'):
         async with self.lock:
+            for row in self.store.visible_cards(chat_id):
+                if row['message_id'] == self.store.panel(chat_id):
+                    self.store.removed(row['booking_id'], chat_id, self.clock())
             config = await self.site.request('config')
             self.admin_url = config['admin_url']
             button = lambda text, data: InlineKeyboardButton(text=text, callback_data='ui:' + data)
@@ -376,13 +402,13 @@ class Service:
                 booking_id = route[5:]
                 b = await self.site.request('bookings/' + booking_id)
                 text = message_text(b).split('\n<i>Сообщение удалится')[0]
-                rows = keyboard(b, self.admin_url).inline_keyboard
+                rows = keyboard(b, self.admin_url).inline_keyboard[:-1]
                 # History actions belong to the persistent panel, not a notification.
                 for row in rows:
                     for item in row:
                         if item.callback_data and item.callback_data.startswith('b:'):
                             item.callback_data = 'ui:act:' + item.callback_data[2:]
-                rows.append([button('‹ К истории', 'list:0'), button('Главное меню', 'home')])
+                rows.append([button('‹ К истории', 'list:0'), InlineKeyboardButton(text='Главное меню', icon_custom_emoji_id=CUSTOM_EMOJI['🏠'], callback_data='ui:home')])
             elif route.startswith('list:'):
                 page = max(0, int(route[5:]))
                 bookings = await self.site.snapshot('1970-01-01T00:00:00Z')
@@ -438,6 +464,9 @@ class Service:
         if self.store.panel(chat_id) != callback.message.message_id:
             await callback.answer('Откройте меню командой /start', show_alert=True)
             return
+        for row in self.store.visible_cards(chat_id):
+            if row['message_id'] == callback.message.message_id:
+                self.store.removed(row['booking_id'], chat_id, self.clock())
         route = (callback.data or '')[3:]
         if not re.fullmatch(r'home|list:[0-9]{1,6}|book:[a-f0-9-]{36}|act:(?:confirm|reject|cancel):[a-f0-9-]{36}', route):
             await callback.answer('Неизвестное действие')
