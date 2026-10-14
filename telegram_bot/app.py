@@ -71,6 +71,7 @@ class Store:
         self.db.execute('PRAGMA journal_mode=WAL')
         self.db.execute('PRAGMA busy_timeout=5000')
         self.db.execute('CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY,value REAL NOT NULL)')
+        self.db.execute('CREATE TABLE IF NOT EXISTS panels (chat_id INTEGER PRIMARY KEY, message_id INTEGER NOT NULL)')
         self.db.execute('CREATE TABLE IF NOT EXISTS pending (booking_id TEXT PRIMARY KEY)')
         self.db.execute('''CREATE TABLE IF NOT EXISTS messages (
           booking_id TEXT NOT NULL, chat_id INTEGER NOT NULL, message_id INTEGER NOT NULL,
@@ -78,6 +79,14 @@ class Store:
           removed_at REAL, deletion_failed INTEGER NOT NULL DEFAULT 0,
           PRIMARY KEY(booking_id,chat_id))''')
         self.db.commit()
+
+    def panel(self, chat_id):
+        row = self.db.execute('SELECT message_id FROM panels WHERE chat_id=?', (chat_id,)).fetchone()
+        return row[0] if row else None
+
+    def save_panel(self, chat_id, message_id):
+        with self.db:
+            self.db.execute('INSERT OR REPLACE INTO panels VALUES(?,?)', (chat_id, message_id))
 
     def find(self, booking_id, chat_id):
         return self.db.execute('SELECT * FROM messages WHERE booking_id=? AND chat_id=?', (booking_id, chat_id)).fetchone()
@@ -317,6 +326,93 @@ class Service:
                 current = await self.site.request('bookings/' + booking_id)
                 await self.bot.edit_message_text(message_text(current) + '\n\n' + emoji('⚠️') + ' ' + html.escape(str(error)), chat_id=callback.from_user.id, message_id=row['message_id'], reply_markup=keyboard(current, self.admin_url))
 
+    async def remove_input(self, message):
+        try:
+            await self.bot.delete_message(message.chat.id, message.message_id)
+        except (TelegramBadRequest, TelegramForbiddenError):
+            log('input_delete_unavailable', chat_id=message.chat.id)
+
+    async def panel(self, chat_id, route='home'):
+        async with self.lock:
+            config = await self.site.request('config')
+            self.admin_url = config['admin_url']
+            button = lambda text, data: InlineKeyboardButton(text=text, callback_data='ui:' + data)
+            rows = []
+            if route.startswith('book:'):
+                booking_id = route[5:]
+                b = await self.site.request('bookings/' + booking_id)
+                text = message_text(b).split('\n<i>Сообщение удалится')[0]
+                rows = keyboard(b, self.admin_url).inline_keyboard
+                # History actions belong to the persistent panel, not a notification.
+                for row in rows:
+                    for item in row:
+                        if item.callback_data and item.callback_data.startswith('b:'):
+                            item.callback_data = 'ui:act:' + item.callback_data[2:]
+                rows.append([button('‹ К истории', 'list:0'), button('Главное меню', 'home')])
+            elif route.startswith('list:'):
+                page = max(0, int(route[5:]))
+                bookings = await self.site.snapshot('1970-01-01T00:00:00Z')
+                bookings.reverse()
+                page = min(page, max(0, (len(bookings) - 1) // 6))
+                text = ('<b>ПО ПУТИ · ИСТОРИЯ ЗАЯВОК</b>\n\n'
+                        f'Всего заявок: <b>{len(bookings)}</b>\n'
+                        'Выберите заявку, чтобы посмотреть детали и изменить статус.')
+                for b in bookings[page * 6:page * 6 + 6]:
+                    label = f"{b['date']} · {b['name'][:24]} · {b['from']} → {b['to']}"
+                    rows.append([button(label[:100], 'book:' + b['id'])])
+                nav = []
+                if page:
+                    nav.append(button('‹ Назад', f'list:{page - 1}'))
+                if (page + 1) * 6 < len(bookings):
+                    nav.append(button('Далее ›', f'list:{page + 1}'))
+                if nav:
+                    rows.append(nav)
+                rows.append([button('Главное меню', 'home')])
+            else:
+                synced = datetime.fromtimestamp(self.last_sync, KRASNOYARSK).strftime('%d.%m · %H:%M') if self.last_sync else 'подключение к сайту'
+                text = ('<b>ПО ПУТИ</b>\n<i>Личный кабинет диспетчера</i>\n\n'
+                        '<b>Все поездки — под контролем</b>\n'
+                        'Смотрите заявки, связывайтесь с пассажирами и подтверждайте поездки прямо здесь.\n\n'
+                        f'<b>Синхронизация:</b> {synced}\n'
+                        '<i>Время Красноярска · изменения видны обоим администраторам.</i>')
+                rows = [[button('Заявки · вся история', 'list:0')],
+                        [button('Обновить', 'home'), InlineKeyboardButton(text='Открыть сайт', url=self.admin_url)]]
+            markup = InlineKeyboardMarkup(inline_keyboard=rows)
+            existing = self.store.panel(chat_id)
+            if existing:
+                try:
+                    await self.bot.edit_message_text(text, chat_id=chat_id, message_id=existing, reply_markup=markup)
+                    return
+                except TelegramBadRequest as error:
+                    if 'message is not modified' in str(error).lower():
+                        return
+                    if 'message to edit not found' not in str(error).lower():
+                        raise
+            message = await self.bot.send_message(chat_id, text, reply_markup=markup)
+            self.store.save_panel(chat_id, message.message_id)
+
+    async def navigation(self, callback):
+        chat_id = callback.from_user.id
+        if self.store.panel(chat_id) != callback.message.message_id:
+            await callback.answer('Откройте меню командой /start', show_alert=True)
+            return
+        route = (callback.data or '')[3:]
+        if not re.fullmatch(r'home|list:[0-9]{1,6}|book:[a-f0-9-]{36}|act:(?:confirm|reject|cancel):[a-f0-9-]{36}', route):
+            await callback.answer('Неизвестное действие')
+            return
+        if route.startswith('act:'):
+            _, action, booking_id = route.split(':')
+            try:
+                async with self.lock:
+                    b = await self.site.request('bookings/' + booking_id, {'action': action, 'admin_id': chat_id})
+                    await self.deliver(b)
+                route = 'book:' + booking_id
+            except SiteError as error:
+                await callback.answer(str(error)[:180], show_alert=True)
+                return
+        await callback.answer()
+        await self.panel(chat_id, route)
+
     async def background(self):
         while True:
             try:
@@ -381,20 +477,18 @@ async def run(cfg):
         dp.message.outer_middleware(AdminOnly(cfg.admins))
         dp.callback_query.outer_middleware(AdminOnly(cfg.admins))
 
-        @dp.message(CommandStart())
-        @dp.message(Command('status'))
+        @dp.message()
         async def dashboard(message):
-            last_sync = datetime.fromtimestamp(service.last_sync, KRASNOYARSK).strftime('%d.%m %H:%M:%S') if service.last_sync else 'ожидается первое соединение'
-            text = ("<b>ПО ПУТИ · ДИСПЕТЧЕРСКАЯ</b>\n\n"
-                    "Заявки с сайта поступают сюда автоматически.\n"
-                    "Решения синхронизируются с сайтом и вторым администратором.\n\n"
-                    f"Последняя синхронизация: {last_sync} · Красноярск\n"
-                    "Карточки хранятся в чате 24 часа.")
-            await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='↗ Открыть кабинет', url=service.admin_url or (await service.site.request('config'))['admin_url'])]]))
+            await service.remove_input(message)
+            if (message.text or '').split('@')[0].split(' ')[0] in ('/start', '/status', '/menu', '/bookings'):
+                await service.panel(message.chat.id, 'list:0' if message.text.startswith('/bookings') else 'home')
 
         @dp.callback_query()
         async def callback_handler(callback):
-            await service.action(callback)
+            if (callback.data or '').startswith('ui:'):
+                await service.navigation(callback)
+            else:
+                await service.action(callback)
 
         @dp.errors()
         async def handler_error(event):

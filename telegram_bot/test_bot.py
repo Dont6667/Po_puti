@@ -95,6 +95,28 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
         for status, symbol in [('confirmed', '🟢'), ('cancelled', '⚪'), ('rejected', '🔴')]:
             self.assertIn(emoji(symbol), message_text({**self.booking, 'status': status}))
 
+    async def test_menu_reuses_persisted_message_and_input_deleted(self):
+        await self.service.panel(self.cfg.admins[0])
+        self.assertEqual(self.store.panel(self.cfg.admins[0]), 11)
+        await self.service.panel(self.cfg.admins[0])
+        self.assertEqual(self.bot.send_message.await_count, 1)
+        self.assertEqual(self.bot.edit_message_text.await_count, 1)
+        await self.service.remove_input(SimpleNamespace(chat=SimpleNamespace(id=self.cfg.admins[0]), message_id=99))
+        self.bot.delete_message.assert_awaited_with(self.cfg.admins[0], 99)
+
+    async def test_history_pagination_and_card_in_same_panel(self):
+        self.site.snapshot.return_value = [{**self.booking, 'id': f'{i:08x}-1234-1234-1234-123456789abc'} for i in range(8)]
+        await self.service.panel(self.cfg.admins[0], 'list:0')
+        self.site.snapshot.assert_awaited_with('1970-01-01T00:00:00Z')
+        markup = self.bot.send_message.call_args.kwargs['reply_markup']
+        self.assertEqual(len(markup.inline_keyboard), 8)
+        self.site.request.side_effect = [{'admin_url': self.service.admin_url}, self.booking]
+        await self.service.panel(self.cfg.admins[0], 'book:' + self.booking['id'])
+        self.assertEqual(self.bot.send_message.await_count, 1)
+        markup = self.bot.edit_message_text.call_args.kwargs['reply_markup']
+        self.assertTrue(markup.inline_keyboard[2][0].callback_data.startswith('ui:act:confirm:'))
+        self.assertNotIn('Сообщение удалится', self.bot.edit_message_text.call_args.args[0])
+
     async def test_access_only_private_allowlist(self):
         gate = AdminOnly(self.cfg.admins)
         handler = AsyncMock()
