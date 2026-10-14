@@ -24,6 +24,7 @@ from aiogram.types import CopyTextButton, InlineKeyboardButton, InlineKeyboardMa
 DAY = 86400
 KRASNOYARSK = timezone(timedelta(hours=7))
 CUSTOM_EMOJI = {
+    '🚐': '5291971905690026986',
     '📞': '6041650621776401666', '🟠': '5846127793313681804',
     '🟢': '5845901478601953249', '⚪': '5846127793313681804',
     '🔴': '5846210329700217522', '📅': '5274055917766202507',
@@ -71,6 +72,7 @@ class Store:
         self.db.execute('PRAGMA journal_mode=WAL')
         self.db.execute('PRAGMA busy_timeout=5000')
         self.db.execute('CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY,value REAL NOT NULL)')
+        self.db.execute('CREATE TABLE IF NOT EXISTS admins (chat_id INTEGER PRIMARY KEY, name TEXT NOT NULL)')
         self.db.execute('CREATE TABLE IF NOT EXISTS panels (chat_id INTEGER PRIMARY KEY, message_id INTEGER NOT NULL)')
         self.db.execute('CREATE TABLE IF NOT EXISTS pending (booking_id TEXT PRIMARY KEY)')
         self.db.execute('''CREATE TABLE IF NOT EXISTS messages (
@@ -79,6 +81,14 @@ class Store:
           removed_at REAL, deletion_failed INTEGER NOT NULL DEFAULT 0,
           PRIMARY KEY(booking_id,chat_id))''')
         self.db.commit()
+
+    def remember_admin(self, chat_id, name):
+        with self.db:
+            self.db.execute('INSERT OR REPLACE INTO admins VALUES(?,?)', (chat_id, name[:128]))
+
+    def admin_name(self, chat_id):
+        row = self.db.execute('SELECT name FROM admins WHERE chat_id=?', (chat_id,)).fetchone()
+        return row[0] if row else 'Администратор'
 
     def panel(self, chat_id):
         row = self.db.execute('SELECT message_id FROM panels WHERE chat_id=?', (chat_id,)).fetchone()
@@ -181,7 +191,7 @@ def message_text(b):
     date = datetime.fromisoformat(b['date']).strftime('%d.%m.%Y')
     return (f"<b>ПО ПУТИ · ЗАЯВКА #{e(b['id'][:8].upper())}</b>\n"
             f"{STATUS.get(b['status'], 'Статус уточняется')}\n\n"
-            f"<b>{e(b['from'])} → {e(b['to'])}</b>\n"
+            f"{emoji('🚐')} <b>{e(b['from'])} → {e(b['to'])}</b>\n"
             f"{emoji('📅')} {date} · <b>{e(b['time'])}</b> <i>Красноярск, UTC+7</i>\n"
             f"💺 Места: <b>{e(seats)}</b> · Пассажиров: {len(b['seats'])}\n"
             f"{emoji('💳')} {'от ' if b.get('priceFrom') else ''}<b>{fare} ₽</b> за выбранные места\n\n"
@@ -370,12 +380,20 @@ class Service:
                 rows.append([button('Главное меню', 'home')])
             else:
                 synced = datetime.fromtimestamp(self.last_sync, KRASNOYARSK).strftime('%d.%m · %H:%M') if self.last_sync else 'подключение к сайту'
-                text = ('<b>ПО ПУТИ</b>\n<i>Личный кабинет диспетчера</i>\n\n'
-                        '<b>Все поездки — под контролем</b>\n'
-                        'Смотрите заявки, связывайтесь с пассажирами и подтверждайте поездки прямо здесь.\n\n'
-                        f'<b>Синхронизация:</b> {synced}\n'
-                        '<i>Время Красноярска · изменения видны обоим администраторам.</i>')
-                rows = [[button('Заявки · вся история', 'list:0')],
+                name = html.escape(self.store.admin_name(chat_id))
+                text = (f"{emoji('🚐')} <b>ПО ПУТИ · ДИСПЕТЧЕРСКАЯ</b>\n"
+                        '<i>Ваши поездки. Всё под контролем.</i>\n\n'
+                        f"{emoji('👤')} <b>{name}, добро пожаловать!</b>\n"
+                        'Здесь можно быстро проверить заявки и помочь пассажирам с поездкой.\n\n'
+                        f"{emoji('📋')} <b>Заявки и история</b>\n"
+                        'Все обращения с сайта — с маршрутом, датой и выбранными местами.\n\n'
+                        f"{emoji('📞')} <b>Связь в одно нажатие</b>\n"
+                        'Позвоните пассажиру или скопируйте его номер.\n\n'
+                        f"{emoji('🟢')} <b>Управление поездками</b>\n"
+                        'Подтверждайте заявки — изменения увидят сайт и второй администратор.\n\n'
+                        f"{emoji('📅')} <b>Синхронизация:</b> {synced}\n"
+                        '<i>Время Красноярска · уведомления хранятся 24 часа, история — в разделе заявок.</i>')
+                rows = [[InlineKeyboardButton(text='Заявки · вся история', icon_custom_emoji_id=CUSTOM_EMOJI['📋'], callback_data='ui:list:0')],
                         [button('Обновить', 'home'), InlineKeyboardButton(text='Открыть сайт', url=self.admin_url)]]
             markup = InlineKeyboardMarkup(inline_keyboard=rows)
             existing = self.store.panel(chat_id)
@@ -479,12 +497,14 @@ async def run(cfg):
 
         @dp.message()
         async def dashboard(message):
+            service.store.remember_admin(message.chat.id, message.from_user.first_name or 'Администратор')
             await service.remove_input(message)
             if (message.text or '').split('@')[0].split(' ')[0] in ('/start', '/status', '/menu', '/bookings'):
                 await service.panel(message.chat.id, 'list:0' if message.text.startswith('/bookings') else 'home')
 
         @dp.callback_query()
         async def callback_handler(callback):
+            service.store.remember_admin(callback.from_user.id, callback.from_user.first_name or 'Администратор')
             if (callback.data or '').startswith('ui:'):
                 await service.navigation(callback)
             else:

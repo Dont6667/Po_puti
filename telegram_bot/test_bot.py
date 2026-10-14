@@ -85,7 +85,7 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_custom_emoji_text_and_buttons(self):
         text = message_text(self.booking)
-        for symbol in ['🟠', '📅', '💳', '👤', '📞', '💬']:
+        for symbol in ['🚐', '🟠', '📅', '💳', '👤', '📞', '💬']:
             self.assertIn(emoji(symbol), text)
         self.assertIn('💺 Места:', text)
         self.assertNotIn('💺', CUSTOM_EMOJI)
@@ -100,7 +100,9 @@ class BotTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn(emoji(symbol), message_text({**self.booking, 'status': status}))
 
     async def test_menu_reuses_persisted_message_and_input_deleted(self):
+        self.store.remember_admin(self.cfg.admins[0], '<Кирилл>')
         await self.service.panel(self.cfg.admins[0])
+        self.assertIn('&lt;Кирилл&gt;, добро пожаловать!', self.bot.send_message.call_args.args[1])
         self.assertEqual(self.store.panel(self.cfg.admins[0]), 11)
         await self.service.panel(self.cfg.admins[0])
         self.assertEqual(self.bot.send_message.await_count, 1)
