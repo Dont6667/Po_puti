@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check server.mjs && node --check admin-api.mjs && node --check content-store.mjs && node --check booking-store.mjs && node --check public/copy-custom.js && node --check public/content.js && node --check public/admin.js && node --check public/booking.js && node --check public/controls.js && node --check public/intro.js && node --check seo.mjs && node --check public/analytics.js && node --check public/images.js && node --check telegram-integration.mjs",
-    "test": "node tests/booking-check.mjs && node tests/deferred-check.mjs",
+    "check": "node --check traffic-guard.mjs && node --check server.mjs && node --check admin-api.mjs && node --check content-store.mjs && node --check booking-store.mjs && node --check public/copy-custom.js && node --check public/content.js && node --check public/admin.js && node --check public/booking.js && node --check public/controls.js && node --check public/intro.js && node --check seo.mjs && node --check public/analytics.js && node --check public/images.js && node --check telegram-integration.mjs",
+    "test": "node tests/traffic-check.mjs && node tests/booking-check.mjs && node tests/deferred-check.mjs",
     "test:seo": "node tests/seo-check.mjs",
     "build": "node scripts/build-public.mjs"
   },

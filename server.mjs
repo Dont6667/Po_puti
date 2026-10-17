@@ -1,3 +1,4 @@
+import {TrafficGuard} from './traffic-guard.mjs';
 import {adminPath} from './admin-route.mjs';
 import {api} from './admin-api.mjs';
 import {publicSeo} from './seo.mjs';
@@ -29,9 +30,12 @@ function send(req,res,data,responseHeaders){
  responseHeaders['Content-Length']=body.length;
  res.writeHead(200,responseHeaders);res.end(req.method==='HEAD'?undefined:body);
 }
-createServer(async(req,res)=>{
+const guard=new TrafficGuard();
+setInterval(()=>guard.report(),60000).unref();
+const server=createServer({maxHeaderSize:16384,headersTimeout:10000,requestTimeout:45000,connectionsCheckingInterval:1000,keepAliveTimeout:5000},async(req,res)=>{
  try{
   const path=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+  if(!guard.accept(req,res,path))return;
   if(await telegramApi(req,res,path))return;
   if(await api(req,res,path))return;
   if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,headers);res.end();return;}
@@ -49,4 +53,7 @@ createServer(async(req,res)=>{
   const immutable=/^\/assets\/(?:built|optimized)\/[^/]+-[a-f\d]{12}\./.test(servedPath)||/^\/assets\/optimized\/[a-f\d]{12}-\d+\./.test(servedPath)||version===createHash('sha256').update(data).digest('hex').slice(0,10);
   send(req,res,data,{...headers,'Content-Type':types[servedPath.split('.').pop()]||'application/octet-stream','Cache-Control':isHtml?'no-store':immutable?'public, max-age=31536000, immutable':'public, max-age=300, must-revalidate',...(isHtml?{'X-Robots-Tag':'noindex,follow'}:{})});
  }catch{res.writeHead(404,{...headers,'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});res.end('Страница не найдена');}
-}).listen(Number(process.env.PORT||3001),process.env.HOST||'127.0.0.1',()=>console.log('Website: http://'+(process.env.HOST||'127.0.0.1')+':'+(process.env.PORT||3001)));
+});
+server.maxHeadersCount=80;server.maxRequestsPerSocket=200;server.maxConnections=512;
+server.setTimeout(180000,socket=>socket.destroy());
+server.listen(Number(process.env.PORT||3001),process.env.HOST||'127.0.0.1',()=>console.log('Website: http://'+(process.env.HOST||'127.0.0.1')+':'+(process.env.PORT||3001)));

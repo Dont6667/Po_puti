@@ -9,6 +9,7 @@ services:
       TELEGRAM_API_KEY: ${TELEGRAM_API_KEY:-}
       TELEGRAM_ADMIN_IDS: ${TELEGRAM_ADMIN_IDS:-6056397902,5673533667,923586346}
       COOKIE_SECURE: 1
+      TRUST_CADDY: 1
       METRICA_ID: ${METRICA_ID:-}
       GA4_ID: ${GA4_ID:-}
     volumes: ["site-data:/app/data", "site-uploads:/app/public/assets/uploads"]

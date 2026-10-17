@@ -1,10 +1,31 @@
+{
+	servers {
+		max_header_size 16KB
+		timeouts {
+			read_header 10s
+			read_body 45s
+			write 180s
+			idle 30s
+		}
+	}
+}
+
 {$DOMAIN} {
-    encode zstd gzip
-    @telegram_internal path /api/internal/telegram/*
-    respond @telegram_internal 404
-    reverse_proxy website:3001
+	encode zstd gzip
+	@telegram_internal path /api/internal/telegram/*
+	respond @telegram_internal 404
+	request_body {
+		max_size 8MB
+	}
+	reverse_proxy website:3001 {
+		header_up X-PP-Client-IP {remote_host}
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 180s
+		}
+	}
 }
 
 www.poputi-vmeste.ru {
-    redir https://poputi-vmeste.ru{uri} permanent
+	redir https://poputi-vmeste.ru{uri} permanent
 }

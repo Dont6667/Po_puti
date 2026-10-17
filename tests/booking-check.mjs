@@ -9,7 +9,7 @@ const telegramKey=randomBytes(32).toString('hex');
 const root=await mkdtemp(join(tmpdir(),'po-puti-test-'));
 let child;
 try{
- for(const name of ['server.mjs','telegram-integration.mjs','seo.mjs','performance.mjs','content-store.mjs','admin-api.mjs','booking-store.mjs','photo-background.mjs','photo-worker.mjs','admin-route.mjs'])await copyFile(new URL('../'+name,import.meta.url),join(root,name));
+ for(const name of ['server.mjs','traffic-guard.mjs','telegram-integration.mjs','seo.mjs','performance.mjs','content-store.mjs','admin-api.mjs','booking-store.mjs','photo-background.mjs','photo-worker.mjs','admin-route.mjs'])await copyFile(new URL('../'+name,import.meta.url),join(root,name));
  await symlink(resolve('node_modules'),join(root,'node_modules'),'junction');
  await mkdir(join(root,'data'));await mkdir(join(root,'public'));
  await writeFile(join(root,'public','index.html'),'<html>test</html>');

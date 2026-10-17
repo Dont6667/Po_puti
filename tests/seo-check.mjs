@@ -5,9 +5,12 @@ import {join,resolve} from 'node:path';
 import {spawn} from 'node:child_process';
 import {createServer} from 'node:net';
 import {parseHTML,DOMParser} from 'linkedom';
+// Crawl at a normal sustained rate so the production page limiter stays active.
+const nativeFetch=globalThis.fetch;let lastFetch=0;
+const fetch=async(...args)=>{const wait=Math.max(0,520-(Date.now()-lastFetch));if(wait)await new Promise(r=>setTimeout(r,wait));lastFetch=Date.now();return nativeFetch(...args);};
 const root=await mkdtemp(join(tmpdir(),'po-puti-seo-'));let child;
 try{
- for(const file of ['server.mjs','telegram-integration.mjs','seo.mjs','performance.mjs','admin-route.mjs','admin-api.mjs','content-store.mjs','booking-store.mjs','photo-background.mjs','photo-worker.mjs','initial-content.json'])await copyFile(resolve(file),join(root,file));
+ for(const file of ['server.mjs','traffic-guard.mjs','telegram-integration.mjs','seo.mjs','performance.mjs','admin-route.mjs','admin-api.mjs','content-store.mjs','booking-store.mjs','photo-background.mjs','photo-worker.mjs','initial-content.json'])await copyFile(resolve(file),join(root,file));
  await symlink(resolve('node_modules'),join(root,'node_modules'),'junction');await symlink(resolve('public'),join(root,'public'),'junction');await mkdir(join(root,'data'));
  const socket=createServer();await new Promise(r=>socket.listen(0,'127.0.0.1',r));const port=socket.address().port;await new Promise(r=>socket.close(r));
  child=spawn(process.execPath,[join(root,'server.mjs')],{env:{...process.env,HOST:'127.0.0.1',PORT:String(port),METRICA_ID:'',GA4_ID:''},stdio:'pipe'});const base='http://127.0.0.1:'+port;

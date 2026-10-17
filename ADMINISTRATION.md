@@ -279,3 +279,6 @@ cd G:\Projects\po-puti-second-site
 Telegram-диспетчер, запуск, логи и удаление карточек через сутки описаны в [TELEGRAM-BOT.md](TELEGRAM-BOT.md). Для первого подключения на VPS: `sudo bash deploy/setup-telegram.sh`. При дальнейших обновлениях бот перезапускается вместе с сайтом.
 
 На VPS `sudo bash deploy/update.sh` собирает оптимизированные файлы автоматически в Docker. Для локальной разработки после правок CSS/JS выполните `npm run build` и перезапустите сервер. Подготовка шрифтов через Python нужна только при замене самих исходных шрифтов; готовые файлы уже включены в репозиторий.
+
+
+Защита от перегрузки и проверка защиты у XorekCloud: [SECURITY-OPERATIONS.md](SECURITY-OPERATIONS.md).
