@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --onnxruntime-node-install-cuda=skip
 COPY public ./public
 COPY scripts ./scripts
 COPY initial-content.json ./
